@@ -1,12 +1,6 @@
 import { Request, Response, NextFunction } from 'express'
+import { AppProperties } from '../AppProperties'
 import * as jwt from 'jsonwebtoken'
-
-// A JWT secret. You do not want to hard-code this here, and should
-// move it into a configuration or passed in environment variable.
-// I didn't include an args lib in this boilerplate so feel free to
-// choose whichever lib you like. Just please, for the love of all
-// things holy, don't hard-code the secret here...
-let secret = 'MyAppsSecret'
 
 /**
  * Middleware that will prevent the request from executing if the request
@@ -64,13 +58,14 @@ export function requiredRole (role: string) {
  */
 function decodeToken (_: Request): jwt.Jwt | null {
   let token: jwt.Jwt | null = null
+  let secret = AppProperties.get('oauth.secret')
   // If we don't have an authorization header, we're done here
-  if (_.headers['authorization']) {
+  if (_.headers['authorization'] && secret) {
     try {
       const authorization = _.headers['authorization'].split(' ')
       // If we have an auth header, but it's not a bearer token, we're done here
       if (authorization[0] === 'Bearer') {
-        token = jwt.verify(authorization[1], secret, {complete: true})
+        token = jwt.verify(authorization[1], secret as string, {complete: true})
       }
     } catch (err) {
       console.error(err)
