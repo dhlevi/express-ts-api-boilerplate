@@ -20,16 +20,16 @@ logger.screenWarn = console.warn
 logger.screenError = console.error
 
 console.log = function (...args) {
-  logHandler(['debug'], args, logger.screenLog)
+  logHandler(['debug'], 'DEBUG', args, logger.screenLog)
 }
 console.info = function (...args) {
-  logHandler(['debug', 'info'], args, logger.screenInfo)
+  logHandler(['debug', 'info'], 'INFO', args, logger.screenInfo)
 }
 console.warn = function (...args) {
-  logHandler(['debug', 'info', 'warn'], args, logger.screenWarn)
+  logHandler(['debug', 'info', 'warn'], 'WARN', args, logger.screenWarn)
 }
 console.error = function (...args) {
-  logHandler(['debug', 'info', 'warn', 'error'], args, logger.screenError)
+  logHandler(['debug', 'info', 'warn', 'error'], 'ERROR', args, logger.screenError)
 }
 // End console log override
 
@@ -53,14 +53,14 @@ Webade.initialize().then(() => {
  * @param args Console args
  * @param out console output function
  */
-function logHandler (levels: Array<string>, args: Array<any>, out: any) {
+function logHandler (levels: Array<string>, level: string, args: Array<any>, out: any) {
   if (levels.includes((AppProperties.get('log.level') as string).toLowerCase())) {
     out(...args)
     if (writeToFile) {
       try {
         const stream = fs.createWriteStream(AppProperties.get('log.path') as string, { flags: 'a+' })
         for (const arg of args) {
-          stream.write(`${new Date().toUTCString()} - ${arg}\n`)
+          stream.write(`${new Date().toUTCString()} - ${level} - ${arg}\n`)
         }
         stream.end()
       } catch (err) {
