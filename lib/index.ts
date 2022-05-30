@@ -44,11 +44,6 @@ Webade.initialize().then(() => {
     console.info(`Current memory allocation: ${Math.ceil((os.totalmem() - os.freemem()) / 1000000)}mb of ${Math.ceil(os.totalmem() / 1000000)}mb`)
     console.info(`Running on: ${os.platform()} ${os.release()} ${os.arch()}`)
     console.info(`The application was started: http://localhost:${port}. Kill it using Ctrl + C`)
-
-
-    const jwt = Webade.fetchTokenJWT('E03564379B25F79AE053690A0A0A7E3A')
-
-
   })
 })
 
