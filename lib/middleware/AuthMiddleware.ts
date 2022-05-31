@@ -1,3 +1,4 @@
+import { Webade } from './../webade/Webade';
 import { Request, Response, NextFunction } from 'express'
 import { AppProperties } from '../AppProperties'
 import * as jwt from 'jsonwebtoken'
@@ -6,16 +7,33 @@ import * as jwt from 'jsonwebtoken'
  * Middleware that will prevent the request from executing if the request
  * header does not contain a valid and current JWT token, decoded by the
  * provided secret
- * @param _ The Request
+ * @param req The Request
  * @param res The Response
  * @param next The next function to execute
  * @returns 
  */
-export function validJWTNeeded (_: Request, res: Response, next: NextFunction) {
+export async function validJWTNeeded (req: Request, res: Response, next: NextFunction) {
+  // No token, no access
+  if (!req.headers['authorization']) return res.status(401).send()
+
   // Decode the token. If there is no provided header or the token
   // doesn't match the secret, this will be null, and the process
   // should return a 401
-  const token = decodeToken(_)
+  let token = decodeToken(req.headers['authorization'])
+
+  // It's possible that this is a auth token from webade, therefore we'll need
+  // to fetch the jwt from webade first
+  if (token === null) {
+    const jwtString = await Webade.fetchTokenJWT(req.headers['authorization'].split(' ')[1])
+    if (jwtString) {
+      // verify the token can be decoded
+      token = decodeToken(jwtString)
+      // and finally, may as well replace the auth token with the full jwt string
+      // so we don't have to fetch it again
+      req.headers['authorization'] = 'Bearer ' + jwtString
+    }
+  }
+
   // If we have a token, verify it however you feel like verifying it
   if (token) {
     // check if the token has expired
@@ -30,19 +48,28 @@ export function validJWTNeeded (_: Request, res: Response, next: NextFunction) {
   }
 }
 
-export function requiredRole (role: string) {
+export function requiredScopes (scopes: Array<string>) {
   // Very weak role checking, but useful as an example
   // Determine the role on the token, and the role the endpoint
   // is requesting. If the user has the role, or they are "admin"
   // then we move on, otherwise we throw an error
-  return (_: Request, res: Response, next: NextFunction) => {
-    const token =  decodeToken(_)
-    if (token) {
-      let userPermissionLevel = (token.payload as jwt.JwtPayload).role
-      if (userPermissionLevel === role || userPermissionLevel === 'admin') {
-        // We have a token, and the user has the required role, move to the
-        // next function. It's expected that we've already validated the token.
-        return next()
+  return (req: Request, res: Response, next: NextFunction) => {
+    if (req.headers['authorization']) {
+      const token = decodeToken(req.headers['authorization'])
+      if (token) {
+        let userScopes = (token.payload as jwt.JwtPayload).scope as Array<string>
+        let hasScopes = true
+
+        for (const scope of scopes) {
+          hasScopes = userScopes.includes(scope)
+          if (!hasScopes) break
+        }
+
+        if (hasScopes) {
+          // We have a token, and the user has the required role, move to the
+          // next function. It's expected that we've already validated the token.
+          return next()
+        }
       }
     }
     // If we dont have a token, or we do but the user isn't in the role return a 401
@@ -56,16 +83,21 @@ export function requiredRole (role: string) {
  * @param _ The request
  * @returns A JWT token, including Header, Payload and Signature, or NULL if the token is invalid
  */
-function decodeToken (_: Request): jwt.Jwt | null {
+function decodeToken (tokenString: string): jwt.Jwt | null {
   let token: jwt.Jwt | null = null
   let secret = AppProperties.get('oauth.secret')
   // If we don't have an authorization header, we're done here
-  if (_.headers['authorization'] && secret) {
+  if (tokenString && secret) {
     try {
-      const authorization = _.headers['authorization'].split(' ')
+      const authorization = tokenString.startsWith('Bearer') ? tokenString.split(' ') : ['Bearer', tokenString]
       // If we have an auth header, but it's not a bearer token, we're done here
       if (authorization[0] === 'Bearer') {
-        token = jwt.verify(authorization[1], secret as string, {complete: true})
+        try {
+          token = jwt.verify(authorization[1], secret as string, {complete: true})
+        } catch (err) {
+          console.error('JWT Token unverifified')
+          token = jwt.decode(authorization[1], {complete: true})
+        }
       }
     } catch (err) {
       console.error(err)

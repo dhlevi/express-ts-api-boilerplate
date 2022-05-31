@@ -26,6 +26,11 @@ export class Webade {
       if (!Webade._instance) {
         Webade._instance = new Webade()
       }
+
+      if (!Webade._instance.initialized) {
+        console.warn('Webade currently uninitialized')
+      }
+
       return Webade._instance
   }
 

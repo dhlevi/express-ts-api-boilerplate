@@ -1,6 +1,6 @@
 import * as express from 'express'
 import { noCache } from '../middleware/NoCacheMiddleware'
-import { validJWTNeeded, requiredRole } from '../middleware/AuthMiddleware'
+import { validJWTNeeded, requiredScopes } from '../middleware/AuthMiddleware'
 import * as cors from 'cors'
 import * as swaggerUi from "swagger-ui-express"
 import { ServiceController } from '../controllers/ServiceController'
@@ -23,10 +23,6 @@ router.get('/openapi', swaggerUi.setup(swaggerDocument));
 // Service/Debug
 router.get(`${ServiceEndpoints.route}/echo/:echo`, forbidExternalFrontends, noCache, serviceController.getEcho)
 router.get(`${ServiceEndpoints.route}/ping`, forbidExternalFrontends, noCache, serviceController.getPing)
-// An example of re-using an existing endpoint function, but with different middleware (role access)
-// Note that this will not be represented on the swagger because it's routed but not annotated
-router.get(`${ServiceEndpoints.route}/ping-secure`, forbidExternalFrontends, noCache, [validJWTNeeded, requiredRole('public')], serviceController.getPing)
-
-// Define Top Level. This requires verification of the provided user roles/grants with webade
+router.get(`${ServiceEndpoints.route}/healthCheck`, forbidExternalFrontends, noCache, [validJWTNeeded, requiredScopes(['List', 'Of', 'Valid', 'Scopes'])], serviceController.getPing)
 
 export default router

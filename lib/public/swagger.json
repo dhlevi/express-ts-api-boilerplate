@@ -68,7 +68,11 @@
 					}
 				},
 				"description": "A Simple Echo endpoint that echoes the passed in string on the path",
-				"security": [],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
 				"parameters": [
 					{
 						"description": "The supplied input to Echo",

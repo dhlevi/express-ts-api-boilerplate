@@ -32,10 +32,19 @@ export class ServiceController extends Controller {
     }
   }
 
-  public async getPing (req: Request, res: Response, next: NextFunction) {
+  public async getPing (_req: Request, res: Response, next: NextFunction) {
     try {
       const endpoints = new ServiceEndpoints()
       res.status(200).json(await endpoints.getPing())
+    } catch (err) {
+      next(err)
+    }
+  }
+
+  public async getHealth (_req: Request, res: Response, next: NextFunction) {
+    try {
+      const endpoints = new ServiceEndpoints()
+      res.status(200).json(await endpoints.getHealth())
     } catch (err) {
       next(err)
     }
