@@ -1,33 +1,23 @@
 import * as express from 'express'
 import { Express } from 'express'
 import { Server } from 'http'
-import { noCache } from './middleware/NoCacheMiddleware'
-import { validJWTNeeded, requiredRole } from './middleware/AuthMiddleware'
 import * as compress from 'compression'
 import * as bodyParser from 'body-parser'
 import * as helmet from 'helmet'
-import * as cors from 'cors'
-import { ServiceEndpoints } from './endpoints/ServiceEndpoints'
+import router from './routes/Routes'
+import { ValidateError } from 'tsoa'
 
 /**
  * Abstraction around the raw Express.js server and Nodes' HTTP server.
  * Defines HTTP request mappings, basic as well as request-mapping-specific
  * middleware chains for application logic, config and everything else.
  */
-
 export class ExpressServer {
   // Server
   private server?: Express
   private httpServer?: Server
-  // endpoint providers
-  // As you add additional endpoint providers/controllers, you
-  // can add them here for registration
-  private serviceEndpoints: ServiceEndpoints
 
-  constructor () {
-    // Instantiate your endpoint providers here
-    this.serviceEndpoints = new ServiceEndpoints()
-  }
+  constructor () { /* empty */ }
 
   /**
    * Initialize the Express Server. This will create the server
@@ -37,9 +27,37 @@ export class ExpressServer {
    */
   public async setup (port: number): Promise<Express> {
     const server = express()
+    // setup path to static content
+    server.use(express.static('/public'))
+    // setup middleware
     this.setupSecurityMiddlewares(server)
     this.setupStandardMiddlewares(server)
+    // configure endpoints (call router plus anything else needed)
     this.configureApiEndpoints(server)
+    // Configure validator/error message responder
+    server.use(function errorHandler(err: unknown, req: express.Request, res: express.Response, next: express.NextFunction): express.Response | void {
+      if (err instanceof ValidateError) {
+        console.warn(`Caught Validation Error for ${req.path}:`, err.fields)
+        // You could replace with a message resource
+        return res.status(422).json({
+          message: "Validation Failed",
+          details: err?.fields
+        })
+      }
+      if (err instanceof Error) {
+        return res.status(500).json({
+          message: "Internal Server Error",
+        })
+      }
+      next()
+    })
+    // Configure a default 404 handler
+    server.use(function notFoundHandler(_req: express.Request, res: express.Response) {
+      res.status(404).send({
+        message: "Not Found"
+      })
+    })
+    // activate the listener
     this.httpServer = this.listen(server, port)
     this.server = server
 
@@ -106,16 +124,6 @@ export class ExpressServer {
    * @param server The express server
    */
   private configureApiEndpoints (server: Express) {
-    // Toggle for cors handling.
-    const forbidExternalFrontends = cors({ origin: false })
-    // Add/register your endpoints here.
-    // If you don't want the endpoint to cache, add the noCache middleware
-    // If you want the server to handle JWT auth, add the Auth Middleware
-    // [validation.validJWTNeeded, validation.requiredRole('public')]
-    // Service/Debug
-    server.get('/api/echo/:echo', forbidExternalFrontends, noCache, this.serviceEndpoints.getEcho)
-    server.get('/api/ping', forbidExternalFrontends, noCache, this.serviceEndpoints.getPing)
-    // An example of re-using an existing endpoint function, but with different middleware (role access)
-    server.get('/api/ping-secure', forbidExternalFrontends, noCache, [validJWTNeeded, requiredRole('public')], this.serviceEndpoints.getPing)
+    server.use(router)
   }
 }

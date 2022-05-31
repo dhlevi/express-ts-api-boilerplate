@@ -1,31 +1,36 @@
-import { NextFunction, Request, Response } from 'express'
+import { Get, Route, SuccessResponse, Path, Response } from 'tsoa'
+import { ValidateError } from '../model/ValidateError'
+
+const routePath = 'service'
 
 /**
- * This is a Service Endpoint provider / Controller
- * This class is used to define your exportable functions that can in turn be bound
- * to the initialized Express server. You do not define Middleware or API endpoints
- * here, which allows for cleaner re-use or controller changing.
- *
- * This provided example is simple, with some exported public endpoint functions,
- * in practice these classes will likely be more complicated. As they get more complex
- * it's recommended to use this class as a provider only, and wire the functions into
- * detailed controllers, so the code doesn't get to cluttered with unrelated pieces.
+ * This is a Service Endpoint provider
+ * This class is used to define your endpoint business logic, and will often
+ * be 1-1 mapping on the related Controller class.
  */
+
+@Route(routePath)
 export class ServiceEndpoints {
-  public getEcho = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const echo = req.params.echo
-      res.status(200).json(echo)
-    } catch (err) {
-      next(err)
-    }
+  public static route = '/' + routePath
+  /**
+   * A Simple Echo endpoint that echoes the passed in string on the path
+   * @param text The supplied input to Echo
+   * @returns Echo
+   */
+  @Get('echo/{text}')
+  @SuccessResponse('200', 'OK')
+  @Response<ValidateError>(422, "Validation Failed")
+  public async getEcho (@Path() text: string) {
+    return text
   }
 
-  public getPing = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      res.status(200).json('pong')
-    } catch (err) {
-      next(err)
-    }
+  /**
+   * A simple Ping message to determine if the API is available and receiving requests
+   * @returns Pong
+   */
+  @Get('ping')
+  @SuccessResponse('200', 'OK')
+  public async getPing () {
+    return 'Pong'
   }
 }
