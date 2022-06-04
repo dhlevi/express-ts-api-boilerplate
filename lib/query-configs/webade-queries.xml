@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="webade">
+  <select id="application">
+    SELECT
+      application_acronym,
+      custodian_number,
+      application_name,
+      application_description,
+      application_object_prefix,
+      enabled_ind,
+      distribute_type_cd,
+      management_enabled_ind,
+      application_version,
+      reported_webade_version
+    FROM
+      application
+    WHERE
+      application_acronym = #{acronym}
+  </select>
+  <select id="actions">
+    SELECT
+      a.action_name,
+      a.privileged_ind,
+      al.role_name
+    FROM
+      action a 
+    JOIN action_lnk al 
+      ON a.action_name = al.action_name 
+    WHERE a.application_acronym = :acronym
+  </select>
+  <select id="roles">
+    SELECT
+      role_name,
+      application_acronym,
+      role_definition,
+      oracle_role
+      FROM application_role
+    WHERE application_acronym = :acronym
+  </select>
+  <select id="preferences">
+    SELECT
+      preference_id,
+      preference_type_code,
+      preference_sub_type,
+      application_acronym,
+      preference_set_name,
+      preference_name,
+      preference_value,
+      created_by,
+      created_date,
+      updated_by,
+      updated_date,
+      revision_count,
+      euser_id,
+      preference_description,
+      preference_data_type_code,
+      sensitive_data_ind
+    WHERE application_acronym = :acronym
+  </select>
+  <select id="proxies">
+    SELECT
+      role_name,
+      application_acronym,
+      db_userid,
+      db_password,
+      db_driver,
+      connection_info,
+      min_connections,
+      max_connections,
+      max_connection_idle_time,
+      max_connection_wait_time,
+      monitor_sleep_time,
+      pool_connections_ind,
+      ping_connections_ind
+    WHERE application_acronym = :acronym
+  </select>
+</mapper>

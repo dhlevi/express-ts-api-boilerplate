@@ -1,5 +1,7 @@
-import oracledb = require("oracledb")
-import { AppProperties } from "../AppProperties"
+import mybatisMapper = require('mybatis-mapper')
+import oracledb = require('oracledb')
+import path = require('path')
+import { AppProperties } from '../AppProperties'
 
 /**
  * Webade helper singleton class. Initialized on application startup.
@@ -112,6 +114,9 @@ export class Webade {
         connectString: AppProperties.get('webade.bootstrap.connection') as string
       })
 
+      // load the queries
+      mybatisMapper.createMapper([path.resolve(__dirname, '../query-configs/webade-queries.xml')])
+
       this._application = null
       this._actions = []
       this._roles = []
@@ -119,7 +124,8 @@ export class Webade {
       this._proxies = []
 
       // Fetch application
-      const application = await connection.execute(`SELECT * from application WHERE application_acronym = :acronym`, [acronym], { outFormat: oracledb.OUT_FORMAT_OBJECT })
+      let sql = mybatisMapper.getStatement('webade', 'application', { acronym : acronym }, {language: 'sql', indent: ' '})
+      const application = await connection.execute(sql, [], { outFormat: oracledb.OUT_FORMAT_OBJECT })
       if (application && application.rows) {
         for (let row of application.rows) {
           console.log(`Webade Application ${acronym} found`)
@@ -127,7 +133,8 @@ export class Webade {
         }
         // Fetch Actions
         console.log('Fetching Actions...')
-        const actions = await connection.execute(`SELECT a.action_name, a.privileged_ind, al.role_name FROM action a JOIN action_lnk al ON a.action_name = al.action_name WHERE a.application_acronym = :acronym`, [acronym], { outFormat: oracledb.OUT_FORMAT_OBJECT })
+        sql = mybatisMapper.getStatement('webade', 'actions', { acronym : acronym }, {language: 'sql', indent: ' '})
+        const actions = await connection.execute(sql, [], { outFormat: oracledb.OUT_FORMAT_OBJECT })
         if (actions && actions.rows) {
           for (let row of actions.rows) {
             this._actions.push(row)
@@ -135,7 +142,8 @@ export class Webade {
         }
         // Fetch Roles
         console.log('Fetching Roles...')
-        const roles = await connection.execute(`SELECT * FROM application_role WHERE application_acronym = :acronym`, [acronym], { outFormat: oracledb.OUT_FORMAT_OBJECT })
+        sql = mybatisMapper.getStatement('webade', 'roles', { acronym : acronym }, {language: 'sql', indent: ' '})
+        const roles = await connection.execute(sql, [], { outFormat: oracledb.OUT_FORMAT_OBJECT })
         if (roles && roles.rows) {
           for (let row of roles.rows) {
             this._roles.push(row)
@@ -143,7 +151,8 @@ export class Webade {
         }
         // Fetch properties
         console.log('Fetching Preferences...')
-        const preferences = await connection.execute(`SELECT * FROM preference WHERE application_acronym = :acronym`, [acronym], { outFormat: oracledb.OUT_FORMAT_OBJECT })
+        sql = mybatisMapper.getStatement('webade', 'preferences', { acronym : acronym }, {language: 'sql', indent: ' '})
+        const preferences = await connection.execute(sql, [], { outFormat: oracledb.OUT_FORMAT_OBJECT })
         if (preferences && preferences.rows) {
           for (let row of preferences.rows) {
             this._preferences.push(row)
@@ -151,7 +160,8 @@ export class Webade {
         }
         // Fetch Proxies
         console.log('Fetching Proxy Connections...')
-        const proxies = await connection.execute(`SELECT * FROM proxy_control WHERE application_acronym = :acronym`, [acronym], { outFormat: oracledb.OUT_FORMAT_OBJECT })
+        sql = mybatisMapper.getStatement('webade', 'proxies', { acronym : acronym }, {language: 'sql', indent: ' '})
+        const proxies = await connection.execute(sql, [], { outFormat: oracledb.OUT_FORMAT_OBJECT })
         if (proxies && proxies.rows) {
           for (let row of proxies.rows) {
             this._proxies.push(row)

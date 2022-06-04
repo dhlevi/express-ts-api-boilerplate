@@ -8,7 +8,8 @@
     "swagger": "tsoa spec",
     "copy-public": "copyfiles -u 1 ./lib/public/* build",
     "copy-config": "copyfiles ./config/* build",
-    "build": "npm run swagger && tsc && npm run copy-public && npm run copy-config",
+    "copy-queries": "copyfiles -u 1 ./lib/query-configs/* build",
+    "build": "npm run swagger && tsc && npm run copy-public && npm run copy-config && npm run copy-queries",
     "prettier:check": "prettier --check service/**/*.{ts,tsx,js,jsx}",
     "prettier:write": "prettier --write service/**/*.{ts,tsx,js,jsx}"
   },
@@ -25,6 +26,7 @@
     "helmet": "^4.6.0",
     "jsonwebtoken": "^8.5.1",
     "multer": "^1.4.5-lts.1",
+    "mybatis-mapper": "^0.6.8",
     "oracledb": "^5.3.0",
     "properties-reader": "^2.2.0",
     "swagger-ui-express": "^4.4.0",

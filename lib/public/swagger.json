@@ -42,7 +42,7 @@
 	},
 	"openapi": "3.0.0",
 	"paths": {
-		"/routePath/echo/{text}": {
+		"/api/echo/{text}": {
 			"get": {
 				"operationId": "GetEcho",
 				"responses": {
@@ -68,11 +68,7 @@
 					}
 				},
 				"description": "A Simple Echo endpoint that echoes the passed in string on the path",
-				"security": [
-					{
-						"api_key": []
-					}
-				],
+				"security": [],
 				"parameters": [
 					{
 						"description": "The supplied input to Echo",
@@ -86,7 +82,7 @@
 				]
 			}
 		},
-		"/routePath/ping": {
+		"/api/ping": {
 			"get": {
 				"operationId": "GetPing",
 				"responses": {
@@ -103,6 +99,46 @@
 				},
 				"description": "A simple Ping message to determine if the API is available and receiving requests",
 				"security": [],
+				"parameters": []
+			}
+		},
+		"/api/healthCheck": {
+			"get": {
+				"operationId": "GetHealth",
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"otherModles": {
+											"type": "string"
+										},
+										"memoryAvailable": {
+											"type": "number",
+											"format": "double"
+										},
+										"status": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"otherModles",
+										"memoryAvailable",
+										"status"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"security": [
+					{
+						"BearerAuth": []
+					}
+				],
 				"parameters": []
 			}
 		}

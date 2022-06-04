@@ -23,6 +23,6 @@ router.get('/openapi', swaggerUi.setup(swaggerDocument));
 // Service/Debug
 router.get(`${ServiceEndpoints.route}/echo/:echo`, forbidExternalFrontends, noCache, serviceController.getEcho)
 router.get(`${ServiceEndpoints.route}/ping`, forbidExternalFrontends, noCache, serviceController.getPing)
-router.get(`${ServiceEndpoints.route}/healthCheck`, forbidExternalFrontends, noCache, [validJWTNeeded, requiredScopes(['List', 'Of', 'Valid', 'Scopes'])], serviceController.getPing)
+router.get(`${ServiceEndpoints.route}/healthCheck`, forbidExternalFrontends, noCache, [validJWTNeeded, requiredScopes(['List', 'Of', 'Valid', 'Scopes'])], serviceController.getHealth)
 
 export default router
