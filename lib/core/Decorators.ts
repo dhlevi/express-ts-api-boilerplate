@@ -9,33 +9,30 @@ import multer = require('multer');
  * Apply Multer middleware to an endpoint for single file download
  * @returns 
  */
-export function UploadSingle (parameter: string, destination: string | null): Function {
+export function UploadSingle (parameter: string, multerOptions?: multer.Options | undefined): Function {
   return function multipartDecorator(target: any, property: any, descriptor: any) {
-    const multerOptions = destination ? { dest: destination } : { storage: multer.memoryStorage() }
     RouteManager.registerEndpointMiddleware(target, property, multer(multerOptions).single(parameter))
     return descriptor
   }
 }
 
 /**
- * Apply Nulter middleware to an endpoint for file downloads
+ * Apply Multer middleware to an endpoint for file downloads
  * @returns 
  */
-export function UploadSingleArray (parameter: string, count: number, destination: string | null): Function {
+export function UploadSingleArray (parameter: string, count: number, multerOptions?: multer.Options | undefined): Function {
   return function multipartDecorator(target: any, property: any, descriptor: any) {
-    const multerOptions = destination ? { dest: destination } : { storage: multer.memoryStorage() }
     RouteManager.registerEndpointMiddleware(target, property, multer(multerOptions).array(parameter, count))
     return descriptor
   }
 }
 
 /**
- * Apply Nulter middleware to an endpoint for file downloads
+ * Apply Multer middleware to an endpoint for file downloads
  * @returns 
  */
-export function MultiPartFormMixed (parameters: Array<multer.Field>, destination: string): Function {
+export function MultiPartFormMixed (parameters: Array<multer.Field>, multerOptions?: multer.Options | undefined): Function {
   return function multipartDecorator(target: any, property: any, descriptor: any) {
-    const multerOptions = destination ? { dest: destination } : { storage: multer.memoryStorage() }
     RouteManager.registerEndpointMiddleware(target, property, multer(multerOptions).fields(parameters))
     return descriptor
   }

@@ -11,14 +11,16 @@ import * as express from 'express'
 export class RouteManager {
   private static _instance: RouteManager
   private controllers: Map<string, RouteDefintion> = new Map<string, RouteDefintion>()
+  private initialized = false
 
 
   // Singleton pattern requires a private constructor to prevent instantiation
   private constructor () { /* empty */ }
   /**
    * The static method that controls the access to the Properties singleton instance.
+   * Private for this singleton so other classes are forced to use the static implementation
    */
-  public static instance (): RouteManager {
+  private static instance (): RouteManager {
       if (!RouteManager._instance) {
         RouteManager._instance = new RouteManager()
       }
@@ -55,13 +57,15 @@ export class RouteManager {
 
   public initializeRoutes (router: Router): boolean {
     try {
+      if (this.initialized) {
+        throw new Error('Routes already initialized.')
+      }
       // iterate the controllers and create a route on the router for each one
-      for (const [key, value] of this.controllers.entries()) {
+      for (const [key, controller] of this.controllers.entries()) {
         console.log('Building routes for controller: ' + key)
-        const controller = value as RouteDefintion
         for (const endpoint of controller.endpoints) {
           const route = controller.route + endpoint.route
-          console.log(`Creating ${endpoint.type.toUpperCase()} route for ${endpoint.name} @ ${endpoint.route}`)
+          console.log(`Creating ${endpoint.type.toUpperCase()} route for ${controller.name + '.' + endpoint.name} @ ${route}`)
           if (endpoint.type === 'get') {
             router.get(route, ...endpoint.middleware, buildRouteHandler(endpoint.endpointFunc, endpoint.success, endpoint.parameters))
           } else if (endpoint.type === 'post') {
@@ -79,22 +83,28 @@ export class RouteManager {
       console.error(err)
       return false
     }
+    this.initialized = true
     return true
   }
 
   public registerController (target: any, route: string | null = null): boolean {
     try {
       // find the declared controller or add a new one if it doesn't exist
-      let controllerDef = this.controllers.get(target.constructor.name)
+      const name = Object.prototype.hasOwnProperty.call(target, 'name') ? target.name : target.constructor.name
+      let controllerDef = this.controllers.get(name)
       if (!controllerDef) {
         controllerDef = new RouteDefintion()
-        controllerDef.name = target.constructor.name
+        controllerDef.name = name
         controllerDef.controller = target
-        this.controllers.set(target.constructor.name, controllerDef)
+        this.controllers.set(name, controllerDef)
       }
       // set the route, if it's supplied
       if (route) {
         controllerDef.route = route
+      }
+      // other refs might be internal or indirect. This will be the defined root class
+      if (Object.prototype.hasOwnProperty.call(target, 'name')) {
+        controllerDef.controller = target
       }
     } catch (err) {
       console.error(err)
@@ -250,7 +260,7 @@ function buildRouteHandler (func: any, status: number | string, parameters: Arra
         } else if (param.type === 'query' && req.query[param.argName]) {
           args[param.index] = req.query[param.argName]
         } else if (param.type === 'body') {
-          args[param.index] = req.body()
+          args[param.index] = req.body
         }
       }
 

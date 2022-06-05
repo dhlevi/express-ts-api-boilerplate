@@ -16,11 +16,20 @@ export class ServiceEndpoints {
   }
 
   /**
+   * A simple echo that returns the body
+   * @param body
+   * @returns 
+   */
+  public async echoBody (body: any) {
+    return body
+  }
+
+  /**
    * A simple Ping message to determine if the API is available and receiving requests
    * @returns Pong
    */
-  public async getPing () {
-    return 'Pong'
+  public async getPing (pongMessage: string) {
+    return pongMessage
   }
 
   public async getHealth () {

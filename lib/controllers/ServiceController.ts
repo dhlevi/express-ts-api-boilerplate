@@ -1,7 +1,7 @@
 import { ValidateError } from '../model/ValidateError'
 import { ServiceEndpoints } from '../endpoints/ServiceEndpoints'
 import { Controller } from '../core/Controller'
-import { Route, SuccessResponse, Response, Security, Get, Path, Query, NoCache, Cors } from '../core/Decorators'
+import { Route, SuccessResponse, Response, Security, Get, Path, Query, NoCache, Cors, Body, Post } from '../core/Decorators'
 
 /**
  * This is a Service Endpoint Controller
@@ -31,7 +31,7 @@ export class ServiceController extends Controller {
   @Response<ValidateError>(422, "Validation Failed")
   @NoCache()
   @Cors({ origin: false })
-  public async getEcho (@Path() echo: string, @Query() echoQuery: string) {
+  public async getEcho (@Path() echo: string) {
     const endpoints = new ServiceEndpoints()
     return endpoints.getEcho(echo)
   }
@@ -44,14 +44,23 @@ export class ServiceController extends Controller {
   @SuccessResponse('200', 'OK')
   @NoCache()
   @Cors({ origin: false })
-  public async getPing () {
+  public async getPing (@Query('pong') pongMessage: string) {
     const endpoints = new ServiceEndpoints()  
-    return endpoints.getPing()
+    return endpoints.getPing(pongMessage)
+  }
+
+  @Post('echo-body')
+  @SuccessResponse('201', 'Created')
+  @NoCache()
+  @Cors({ origin: false })
+  public async echoBody (@Body() bodyObject: any) {
+    const endpoints = new ServiceEndpoints()  
+    return endpoints.echoBody(bodyObject)
   }
 
   @Get('healthCheck')
   @SuccessResponse('200', 'OK')
-  @Security('BearerAuth')
+  @Security('BearerAuth', ['some', 'required', 'scopes'])
   @NoCache()
   @Cors({ origin: false })
   public async getHealth () {
