@@ -64,6 +64,14 @@ export class RouteManager {
           console.log(`Creating ${endpoint.type.toUpperCase()} route for ${endpoint.name} @ ${endpoint.route}`)
           if (endpoint.type === 'get') {
             router.get(route, ...endpoint.middleware, buildRouteHandler(endpoint.endpointFunc, endpoint.success, endpoint.parameters))
+          } else if (endpoint.type === 'post') {
+            router.post(route, ...endpoint.middleware, buildRouteHandler(endpoint.endpointFunc, endpoint.success, endpoint.parameters))
+          } else if (endpoint.type === 'put') {
+            router.put(route, ...endpoint.middleware, buildRouteHandler(endpoint.endpointFunc, endpoint.success, endpoint.parameters))
+          } else if (endpoint.type === 'patch') {
+            router.patch(route, ...endpoint.middleware, buildRouteHandler(endpoint.endpointFunc, endpoint.success, endpoint.parameters))
+          } else if (endpoint.type === 'delete') {
+            router.delete(route, ...endpoint.middleware, buildRouteHandler(endpoint.endpointFunc, endpoint.success, endpoint.parameters))
           }
         }
       }
