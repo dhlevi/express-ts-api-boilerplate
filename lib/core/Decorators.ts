@@ -3,6 +3,54 @@ import cors = require('cors')
 import {HttpStatusCodeLiteral, HttpStatusCodeStringLiteral, OtherValidOpenApiHttpStatusCode } from 'tsoa'
 import { requiredScopes, validJWTNeeded } from '../middleware/AuthMiddleware';
 import { noCache } from '../middleware/NoCacheMiddleware';
+import multer = require('multer');
+
+/**
+ * Apply Multer middleware to an endpoint for single file download
+ * @returns 
+ */
+export function UploadSingle (parameter: string, destination: string | null): Function {
+  return function multipartDecorator(target: any, property: any, descriptor: any) {
+    const multerOptions = destination ? { dest: destination } : { storage: multer.memoryStorage() }
+    RouteManager.registerEndpointMiddleware(target, property, multer(multerOptions).single(parameter))
+    return descriptor
+  }
+}
+
+/**
+ * Apply Nulter middleware to an endpoint for file downloads
+ * @returns 
+ */
+export function UploadSingleArray (parameter: string, count: number, destination: string | null): Function {
+  return function multipartDecorator(target: any, property: any, descriptor: any) {
+    const multerOptions = destination ? { dest: destination } : { storage: multer.memoryStorage() }
+    RouteManager.registerEndpointMiddleware(target, property, multer(multerOptions).array(parameter, count))
+    return descriptor
+  }
+}
+
+/**
+ * Apply Nulter middleware to an endpoint for file downloads
+ * @returns 
+ */
+export function MultiPartFormMixed (parameters: Array<multer.Field>, destination: string): Function {
+  return function multipartDecorator(target: any, property: any, descriptor: any) {
+    const multerOptions = destination ? { dest: destination } : { storage: multer.memoryStorage() }
+    RouteManager.registerEndpointMiddleware(target, property, multer(multerOptions).fields(parameters))
+    return descriptor
+  }
+}
+
+/**
+ * Apply Nulter middleware to an endpoint for file 
+ * @returns 
+ */
+export function MultiPartFormText (): Function {
+  return function multipartDecorator(target: any, property: any, descriptor: any) {
+    RouteManager.registerEndpointMiddleware(target, property, multer().none())
+    return descriptor
+  }
+}
 
 /**
  * Apply NoCache middleware to an endpoint
