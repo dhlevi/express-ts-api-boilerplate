@@ -1,6 +1,8 @@
-import { NextFunction, Request, Response } from 'express'
-import { Controller } from 'tsoa'
+import { ValidateError } from '../model/ValidateError'
 import { ServiceEndpoints } from '../endpoints/ServiceEndpoints'
+import cors = require('cors')
+import { noCache } from '../middleware/NoCacheMiddleware'
+import { Controller, Route, SuccessResponse, Response, Security, Get, Path, Query } from '../core/Controller'
 
 /**
  * This is a Service Endpoint Controller
@@ -15,38 +17,42 @@ import { ServiceEndpoints } from '../endpoints/ServiceEndpoints'
  * That logic can be found in the related "Endpoint" class", in this case
  * ServiceEndpoints. The functions here are basically just wrappers around those
  * functions, to abstract away as much of the request/response and middleware stuff
- * so your business logic can focus on that.
+ * so your business logic can focus on that. Obviously the examples here are so
+ * simple that it seems a bit silly.
  */
+@Route('api')
 export class ServiceController extends Controller {
-  public getRoute () {
-    return ServiceEndpoints.route
+  public middleware = [cors({ origin: false }), noCache]
+
+  /**
+   * A Simple Echo endpoint that echoes the passed in string on the path
+   * @param text The supplied input to Echo
+   * @returns Echo
+   */
+  @Get('echo/{echo}')
+  @SuccessResponse('200', 'OK')
+  @Response<ValidateError>(422, "Validation Failed")
+  public async getEcho (@Path() echo: string, @Query() echoQuery: string) {
+    const endpoints = new ServiceEndpoints()
+    return endpoints.getEcho(echo)
   }
 
-  public async getEcho (req: Request, res: Response, next: NextFunction) {
-    try {
-      const endpoints = new ServiceEndpoints()
-      const echo = await endpoints.getEcho(req.params.echo)
-      res.status(200).json(echo)
-    } catch (err) {
-      next(err)
-    }
+  /**
+   * A simple Ping message to determine if the API is available and receiving requests
+   * @returns Pong
+   */
+  @Get('ping')
+  @SuccessResponse('200', 'OK')
+  public async getPing () {
+    const endpoints = new ServiceEndpoints()  
+    return endpoints.getPing()
   }
 
-  public async getPing (_req: Request, res: Response, next: NextFunction) {
-    try {
-      const endpoints = new ServiceEndpoints()
-      res.status(200).json(await endpoints.getPing())
-    } catch (err) {
-      next(err)
-    }
-  }
-
-  public async getHealth (_req: Request, res: Response, next: NextFunction) {
-    try {
-      const endpoints = new ServiceEndpoints()
-      res.status(200).json(await endpoints.getHealth())
-    } catch (err) {
-      next(err)
-    }
+  @Get('healthCheck')
+  @SuccessResponse('200', 'OK')
+  @Security('BearerAuth')
+  public async getHealth () {
+    const endpoints = new ServiceEndpoints()
+    return endpoints.getHealth()
   }
 }
