@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="webade">
+  <sql id="where">
+    WHERE
+      application_acronym = #{acronym}
+  </sql>
   <select id="application">
     SELECT
       application_acronym,
@@ -15,8 +19,7 @@
       reported_webade_version
     FROM
       application
-    WHERE
-      application_acronym = #{acronym}
+    <include refid="where"/>
   </select>
   <select id="actions">
     SELECT
@@ -27,7 +30,8 @@
       action a 
     JOIN action_lnk al 
       ON a.action_name = al.action_name 
-    WHERE a.application_acronym = :acronym
+    WHERE
+      a.application_acronym = #{acronym}
   </select>
   <select id="roles">
     SELECT
@@ -35,8 +39,9 @@
       application_acronym,
       role_definition,
       oracle_role
-      FROM application_role
-    WHERE application_acronym = :acronym
+      FROM 
+        application_role
+    <include refid="where"/>
   </select>
   <select id="preferences">
     SELECT
@@ -56,7 +61,9 @@
       preference_description,
       preference_data_type_code,
       sensitive_data_ind
-    WHERE application_acronym = :acronym
+    FROM
+      preference
+    <include refid="where"/>
   </select>
   <select id="proxies">
     SELECT
@@ -73,6 +80,8 @@
       monitor_sleep_time,
       pool_connections_ind,
       ping_connections_ind
-    WHERE application_acronym = :acronym
+    FROM
+      proxy_control
+    <include refid="where"/>
   </select>
 </mapper>

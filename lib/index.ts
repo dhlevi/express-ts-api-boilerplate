@@ -2,7 +2,7 @@ import { Webade } from './webade/Webade';
 import { Application } from './Application'
 import * as os from 'os'
 import * as fs from 'fs'
-import { AppProperties } from './AppProperties'
+import { AppProperties } from './core/AppProperties'
 
 /**
  * Entrypoint for bootstrapping and starting the application.

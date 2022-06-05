@@ -1,7 +1,7 @@
 import mybatisMapper = require('mybatis-mapper')
 import oracledb = require('oracledb')
 import path = require('path')
-import { AppProperties } from '../AppProperties'
+import { AppProperties } from '../core/AppProperties'
 
 /**
  * Webade helper singleton class. Initialized on application startup.

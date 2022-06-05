@@ -77,14 +77,6 @@
 						"schema": {
 							"type": "string"
 						}
-					},
-					{
-						"in": "query",
-						"name": "echoQuery",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
 					}
 				]
 			}
@@ -106,7 +98,41 @@
 				},
 				"description": "A simple Ping message to determine if the API is available and receiving requests",
 				"security": [],
-				"parameters": []
+				"parameters": [
+					{
+						"in": "query",
+						"name": "pong",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/api/echo-body": {
+			"post": {
+				"operationId": "EchoBody",
+				"responses": {
+					"201": {
+						"description": "Created",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {}
+						}
+					}
+				}
 			}
 		},
 		"/api/healthCheck": {
@@ -143,7 +169,11 @@
 				},
 				"security": [
 					{
-						"BearerAuth": []
+						"BearerAuth": [
+							"some",
+							"required",
+							"scopes"
+						]
 					}
 				],
 				"parameters": []

@@ -1,6 +1,6 @@
 import { Webade } from './../webade/Webade';
 import { Request, Response, NextFunction } from 'express'
-import { AppProperties } from '../AppProperties'
+import { AppProperties } from '../core/AppProperties'
 import * as jwt from 'jsonwebtoken'
 
 /**

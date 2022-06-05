@@ -5,6 +5,15 @@ import { requiredScopes, validJWTNeeded } from '../middleware/AuthMiddleware';
 import { noCache } from '../middleware/NoCacheMiddleware';
 import multer = require('multer');
 
+/*
+ * The Decorators file creates functions used as decorators for your controllers
+ * Decorators are those '@thing()' bits you see before class and function definitions
+ * A decorator will apply on instantiation. Default decorators are overwrites of the
+ * existing TSOA decorators and should be used in place of tsoa (which is only used for swagger).
+ * Feel free to create your own as needed.
+ */
+
+
 /**
  * Apply Multer middleware to an endpoint for single file download
  * @returns 
@@ -174,6 +183,7 @@ export function SuccessResponse (name: string | number, description?: string | u
  */
 export function Response<ExampleType>(name: HttpStatusCodeLiteral | HttpStatusCodeStringLiteral | OtherValidOpenApiHttpStatusCode, description?: string, example?: ExampleType, produces?: string | string[]): Function {
   return function responseDecorator(target: any, property: any, descriptor: any) {
+    // apply to route!
     return descriptor
   }
 }

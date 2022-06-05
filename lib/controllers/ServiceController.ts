@@ -6,8 +6,13 @@ import { Route, SuccessResponse, Response, Security, Get, Path, Query, NoCache, 
 /**
  * This is a Service Endpoint Controller
  * This class is used to define your exportable functions that can in turn be bound
- * to the initialized Express server. You do not define Middleware or API endpoints
- * here, which allows for cleaner re-use or controller changing.
+ * to the initialized Express server.
+ * Pay attention to the use of Decorators on the class, Without these, your endpoints will not be registered
+ * and the class will do nothing. You also must instantiate the class on the router.
+ *
+ * The request and response objects are not exposed on this class, or subsequent classes
+ * If you need to provide headers or manipulate the request or response in some way, you can use
+ * middleware or supply a decorator for the purpose. Anything else will be ignored.
  *
  * This provided example is simple, with some exported public endpoint functions,
  * in practice these classes will likely be more complicated.

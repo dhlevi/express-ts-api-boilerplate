@@ -1,3 +1,4 @@
+import { Controller } from './Controller';
 import { Router } from "express"
 import * as express from 'express'
 
@@ -27,28 +28,69 @@ export class RouteManager {
       return RouteManager._instance
   }
 
+  /**
+   * Initialize the routes from the provided controller
+   * details. Can only be done once.
+   * @param router The router to configure with
+   * @returns result
+   */
   public static initializeRoutes (router: Router): boolean {
     return RouteManager.instance().initializeRoutes(router)
   }
 
-  public static registerController (target: any, route: string | null = null): boolean {
+  /**
+   * Register a controller on the Route Manager
+   * @param target The target controller class
+   * @param route 
+   * @returns 
+   */
+  public static registerController (target: Controller, route: string | null = null): boolean {
     return RouteManager.instance().registerController(target, route)
   }
 
-  public static registerEndpoint (target: any, property: string, route: string | null = null, type: string | null = null, success: number | string | null = null, successDescription: string | null = null): boolean {
+  /**
+   * Register an endpoint on the route manager. An endpoint must be a function of a
+   * Controller class
+   * @param target 
+   * @param property 
+   * @param route 
+   * @param type 
+   * @param success 
+   * @param successDescription 
+   * @returns 
+   */
+  public static registerEndpoint (target: Controller, property: string, route: string | null = null, type: string | null = null, success: number | string | null = null, successDescription: string | null = null): boolean {
     const regController = RouteManager.instance().registerController(target)
     const regEndpoint = RouteManager.instance().registerEndpoint(target, property, route, type, success, successDescription)
     return regController && regEndpoint
   }
 
-  public static registerEndpointMiddleware(target: any, property: string, middleware: any) {
+  /**
+   * Register an endpoint middleware processor. This will be applied to the created route
+   * @param target 
+   * @param property 
+   * @param middleware 
+   * @returns 
+   */
+  public static registerEndpointMiddleware(target: Controller, property: string, middleware: any) {
     const regController = RouteManager.instance().registerController(target)
     const regEndpoint = RouteManager.instance().registerEndpoint(target, property)
     const regMiddleware = RouteManager.instance().registerMiddleware(target, property, middleware)
     return regController && regEndpoint && regMiddleware
   }
 
-  public static registerArgument (target: any, property: string, requestProperty: string | undefined, argIndex: number, type: string): boolean {
+  /**
+   * Register an endpoint argument. The argument must be an argument on the endpoint function
+   * and a valid index is required or mappings may become crossed. If the api argument is different
+   * then the function argument, supply a requestProperty override.
+   * @param target 
+   * @param property 
+   * @param requestProperty 
+   * @param argIndex 
+   * @param type 
+   * @returns 
+   */
+  public static registerArgument (target: Controller, property: string, requestProperty: string | undefined, argIndex: number, type: string): boolean {
     const regController = RouteManager.instance().registerController(target)
     const regEndpoint = RouteManager.instance().registerEndpoint(target, property)
     const regArgument = RouteManager.instance().registerArgument(target, property, requestProperty, argIndex, type)
@@ -87,10 +129,10 @@ export class RouteManager {
     return true
   }
 
-  public registerController (target: any, route: string | null = null): boolean {
+  public registerController (target: Controller, route: string | null = null): boolean {
     try {
       // find the declared controller or add a new one if it doesn't exist
-      const name = Object.prototype.hasOwnProperty.call(target, 'name') ? target.name : target.constructor.name
+      const name = Object.prototype.hasOwnProperty.call(target, 'name') ? (target as any).name : target.constructor.name
       let controllerDef = this.controllers.get(name)
       if (!controllerDef) {
         controllerDef = new RouteDefintion()
@@ -113,7 +155,7 @@ export class RouteManager {
     return true
   }
 
-  public registerEndpoint (target: any, property: string, route: string | null = null, type: string | null = null, success: number | string | null = null, successDescription: string | null = null): boolean {
+  public registerEndpoint (target: Controller, property: string, route: string | null = null, type: string | null = null, success: number | string | null = null, successDescription: string | null = null): boolean {
     try {
       // find the declared controller or add a new one if it doesn't exist
       const controllerDef = this.controllers.get(target.constructor.name)
@@ -122,7 +164,7 @@ export class RouteManager {
         if (!endpoint) {
           endpoint = new EndpointDefinition()
           endpoint.name = property
-          endpoint.endpointFunc = target[property]
+          endpoint.endpointFunc = (target as any)[property]
           controllerDef.endpoints.push(endpoint)
         }
         // define route and type, if supplied
@@ -148,7 +190,7 @@ export class RouteManager {
     return true
   }
 
-  public registerMiddleware (target: any, property: string, middleware: any): boolean {
+  public registerMiddleware (target: Controller, property: string, middleware: any): boolean {
     try {
       // find the declared controller or add a new one if it doesn't exist
       const controllerDef = this.controllers.get(target.constructor.name)
@@ -169,7 +211,7 @@ export class RouteManager {
     return true
   }
 
-  public registerArgument (target: any, property: string, requestProperty: string | undefined, argIndex: number, type: string): boolean {
+  public registerArgument (target: Controller, property: string, requestProperty: string | undefined, argIndex: number, type: string): boolean {
     try {
       // find the declared controller or add a new one if it doesn't exist
       const controllerDef = this.controllers.get(target.constructor.name)
@@ -185,7 +227,7 @@ export class RouteManager {
           param.index = argIndex
 
           // extract the function argument from the target so we can determine the correct name
-          const func = target[property]
+          const func = (target as any)[property]
           const funcString = func.toString().replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/(.)*/g, '').replace(/{[\s\S]*}/, '').replace(/=>/g, '').trim()
           const funcArgs = funcString.substring(funcString.indexOf("(") + 1, funcString.length - 1).split(", ")
 
