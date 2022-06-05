@@ -1,8 +1,7 @@
 import { ValidateError } from '../model/ValidateError'
 import { ServiceEndpoints } from '../endpoints/ServiceEndpoints'
-import cors = require('cors')
-import { noCache } from '../middleware/NoCacheMiddleware'
-import { Controller, Route, SuccessResponse, Response, Security, Get, Path, Query } from '../core/Controller'
+import { Controller } from '../core/Controller'
+import { Route, SuccessResponse, Response, Security, Get, Path, Query, NoCache, Cors } from '../core/Decorators'
 
 /**
  * This is a Service Endpoint Controller
@@ -22,8 +21,6 @@ import { Controller, Route, SuccessResponse, Response, Security, Get, Path, Quer
  */
 @Route('api')
 export class ServiceController extends Controller {
-  public middleware = [cors({ origin: false }), noCache]
-
   /**
    * A Simple Echo endpoint that echoes the passed in string on the path
    * @param text The supplied input to Echo
@@ -32,6 +29,8 @@ export class ServiceController extends Controller {
   @Get('echo/{echo}')
   @SuccessResponse('200', 'OK')
   @Response<ValidateError>(422, "Validation Failed")
+  @NoCache()
+  @Cors({ origin: false })
   public async getEcho (@Path() echo: string, @Query() echoQuery: string) {
     const endpoints = new ServiceEndpoints()
     return endpoints.getEcho(echo)
@@ -43,6 +42,8 @@ export class ServiceController extends Controller {
    */
   @Get('ping')
   @SuccessResponse('200', 'OK')
+  @NoCache()
+  @Cors({ origin: false })
   public async getPing () {
     const endpoints = new ServiceEndpoints()  
     return endpoints.getPing()
@@ -51,6 +52,8 @@ export class ServiceController extends Controller {
   @Get('healthCheck')
   @SuccessResponse('200', 'OK')
   @Security('BearerAuth')
+  @NoCache()
+  @Cors({ origin: false })
   public async getHealth () {
     const endpoints = new ServiceEndpoints()
     return endpoints.getHealth()
