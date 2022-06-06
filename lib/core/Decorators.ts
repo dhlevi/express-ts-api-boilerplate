@@ -381,7 +381,7 @@ export function UploadedFile(): Function {
  * @returns 
  */
 export function Header(name?: string | undefined): Function {
-  return function uploadFileDecorator(target: any, property: any, argIndex: any) {
+  return function headerDecorator(target: any, property: any, argIndex: any) {
     RouteManager.registerArgument(target, property, name, argIndex, 'header')
     return argIndex
   }
