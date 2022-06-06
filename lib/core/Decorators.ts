@@ -259,20 +259,8 @@ export function Body(name?: string | undefined): Function {
  * @returns 
  */
 export function Request(type: string | null): Function {
-  return function bodyDecorator(target: any, property: any, argIndex: any) {
+  return function requestDecorator(target: any, property: any, argIndex: any) {
     RouteManager.registerArgument(target, property, undefined, argIndex, type || 'request')
-    return argIndex
-  }
-}
-
-/**
- * Declare this attributes source to be the file/files result from using one of
- * the multer multipart file uploads
- * @returns 
- */
-export function Files(): Function {
-  return function bodyDecorator(target: any, property: any, argIndex: any) {
-    RouteManager.registerArgument(target, property, undefined, argIndex, 'files')
     return argIndex
   }
 }
@@ -322,5 +310,41 @@ export function Hidden (): Function {
   return function hiddenDecorator(target: any, property: any, descriptor: any) {
     // ignored, just for supplying hidden flag on swagger via tsoa
     return descriptor
+  }
+}
+
+/**
+ * Declare this attributes source to be the file/files result from using one of
+ * the multer multipart file uploads
+ * @returns 
+ */
+export function FormField(): Function {
+  return function fieldDecorator(target: any, property: any, argIndex: any) {
+    RouteManager.registerArgument(target, property, undefined, argIndex, 'formField')
+    return argIndex
+  }
+}
+
+/**
+ * Declare this attributes source to be the file/files result from using one of
+ * the multer multipart file uploads
+ * @returns 
+ */
+export function UploadedFiles(): Function {
+  return function uploadFilesDecorator(target: any, property: any, argIndex: any) {
+    RouteManager.registerArgument(target, property, undefined, argIndex, 'files')
+    return argIndex
+  }
+}
+
+/**
+ * Declare this attributes source to be the file/files result from using one of
+ * the multer multipart file uploads
+ * @returns 
+ */
+export function UploadedFile(): Function {
+  return function uploadFileDecorator(target: any, property: any, argIndex: any) {
+    RouteManager.registerArgument(target, property, undefined, argIndex, 'files')
+    return argIndex
   }
 }

@@ -1,7 +1,7 @@
 import { ValidateError } from '../model/ValidateError'
 import { ServiceEndpoints } from '../endpoints/ServiceEndpoints'
 import { Controller } from '../core/Controller'
-import { Route, SuccessResponse, Request, Response, Security, Get, Path, Query, NoCache, Cors, Body, Post, MultiPartFormMixed, Hidden } from '../core/Decorators'
+import { Route, SuccessResponse, Request, Response, Security, Get, Path, Query, NoCache, Cors, Body, Post, MultiPartFormMixed, Hidden, UploadedFiles } from '../core/Decorators'
 import multer = require('multer')
 
 /**
@@ -69,9 +69,7 @@ export class ServiceController extends Controller {
   @NoCache()
   @MultiPartFormMixed([{ name: 'image1', maxCount: 1 }, { name: 'image2', maxCount: 1 }], { storage: multer.memoryStorage() })
   @Cors({ origin: false })
-  public async uploadForm (@Hidden() @Request('files') files: any) {
-    // note: using the Decorator Files() causes tsoa to fail, so use Request('files') if you
-    // intend to generate swagger with tsoa.
+  public async uploadForm (@Hidden() @UploadedFiles() files: any) {
     return { uploadedFiles: JSON.stringify(files)}
   }
 

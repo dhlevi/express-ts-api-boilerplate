@@ -323,6 +323,8 @@ function buildRouteHandler (func: any, status: number | string, parameters: Arra
           args[param.index] = req.body
         } else if (param.type === 'request') {
           args[param.index] = req
+        } else if (param.type === 'formField') {
+          args[param.index] = req.body[param.argName] || null
         } else if (param.type === 'files') {
           args[param.index] = Object.prototype.hasOwnProperty.call(req, 'file') ? req.file :
                               Object.prototype.hasOwnProperty.call(req, 'files') ? req.files :
