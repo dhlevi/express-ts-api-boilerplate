@@ -255,11 +255,12 @@ export function Body(name?: string | undefined): Function {
 /**
  * Declare this attributes source to be the original Reqeust object.
  * The request object will also contain the body
+ * @type An argument to extract from the request, usually for fetching multer files on upload
  * @returns 
  */
-export function Request(): Function {
+export function Request(type: string | null): Function {
   return function bodyDecorator(target: any, property: any, argIndex: any) {
-    RouteManager.registerArgument(target, property, undefined, argIndex, 'request')
+    RouteManager.registerArgument(target, property, undefined, argIndex, type || 'request')
     return argIndex
   }
 }

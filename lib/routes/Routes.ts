@@ -12,7 +12,7 @@ const swaggerDocument = require('../public/swagger.json');
 router.use('/openapi', swaggerUi.serve);
 router.get('/openapi', swaggerUi.setup(swaggerDocument));
 // Next, if you want your routes built, you need to instantiate your Controllers, like so:
-console.info('Initializing cotrollers...')
+console.info('Initializing controllers...')
 const serviceController = new ServiceController()
 // Do the same for any other controllers you want routed
 // from this point, the Decorators in your controller will automatically create a routing definition for you

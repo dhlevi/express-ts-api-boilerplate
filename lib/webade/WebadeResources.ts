@@ -25,11 +25,10 @@ export class Application {
 export class Action {
   public actionName: string | null = null
   public privileged: string | null = null
-  public roleName: string | null = null
+  public roles: Array<string> = []
 
   constructor (row: any) {
     this.actionName = row['ACTION_NAME'] ? row['ACTION_NAME'] : null
-    this.roleName = row['ROLE_NAME'] ? row['ROLE_NAME'] : null
     this.privileged = row['PRIVILEGED_IND'] ? row['PRIVILEGED_IND'] : null
   }
 }

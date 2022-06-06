@@ -311,6 +311,8 @@ function buildRouteHandler (func: any, status: number | string, parameters: Arra
           args[param.index] = Object.prototype.hasOwnProperty.call(req, 'file') ? req.file :
                               Object.prototype.hasOwnProperty.call(req, 'files') ? req.files :
                               null
+        } else {
+          args[param.index] = (req as any)[param.type]
         }
       }
 

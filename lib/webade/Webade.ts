@@ -63,6 +63,10 @@ export class Webade {
     return Webade.instance().proxies()
   }
 
+  public static canPerformAction (actionName: string, roleName: string): boolean {
+    return Webade.instance().actions().some(a => a.actionName === actionName && a.roles.some(r => r === roleName))
+  }
+
   public static getPreference (set: string, preference: string): Preference | undefined {
     return Webade.instance().preferences().find(p => p.preferenceSetName?.toLowerCase() === set.toLowerCase() && p.preferenceName?.toLowerCase() === preference.toLowerCase())
   }
@@ -146,7 +150,12 @@ export class Webade {
         const actions = await connection.execute(sql, [], { outFormat: oracledb.OUT_FORMAT_OBJECT })
         if (actions && actions.rows) {
           for (let row of actions.rows) {
-            this._actions.push(new Action(row))
+            let action = this._actions.find(a => a.actionName === (row as any)['ACTION_NAME'])
+            if (!action) {
+              action = new Action(row)
+              this._actions.push(action)
+            }
+            action.roles.push((row as any)['ROLE_NAME'])
           }
         }
         // Fetch Roles

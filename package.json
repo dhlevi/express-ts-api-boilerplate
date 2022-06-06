@@ -10,6 +10,7 @@
     "copy-config": "copyfiles ./config/* build",
     "copy-queries": "copyfiles -u 1 ./lib/query-configs/* build",
     "build": "npm run swagger && tsc && npm run copy-public && npm run copy-config && npm run copy-queries",
+    "build-no-swagger": "tsc && npm run copy-public && npm run copy-config && npm run copy-queries",
     "prettier:check": "prettier --check service/**/*.{ts,tsx,js,jsx}",
     "prettier:write": "prettier --write service/**/*.{ts,tsx,js,jsx}"
   },

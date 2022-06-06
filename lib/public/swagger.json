@@ -145,10 +145,12 @@
 							"application/json": {
 								"schema": {
 									"properties": {
-										"didItWork": {}
+										"uploadedFiles": {
+											"type": "string"
+										}
 									},
 									"required": [
-										"didItWork"
+										"uploadedFiles"
 									],
 									"type": "object"
 								}
@@ -157,15 +159,7 @@
 					}
 				},
 				"security": [],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {}
-						}
-					}
-				}
+				"parameters": []
 			}
 		},
 		"/api/healthCheck": {
