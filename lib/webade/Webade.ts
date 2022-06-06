@@ -1,6 +1,8 @@
+import { Application, Action, Role, Preference, DatabaseProxy } from './WebadeResources';
 import mybatisMapper = require('mybatis-mapper')
 import oracledb = require('oracledb')
 import path = require('path')
+import { v4 as uuidv4 } from 'uuid'
 import { AppProperties } from '../core/AppProperties'
 
 /**
@@ -13,11 +15,11 @@ import { AppProperties } from '../core/AppProperties'
 export class Webade {
   private static _instance: Webade
   private initialized = false
-  private _application: any
-  private _actions: Array<any> = []
-  private _roles: Array<any> = []
-  private _preferences: Array<any> = []
-  private _proxies: Array<any> = []
+  private _application: Application | null = null
+  private _actions: Array<Action> = []
+  private _roles: Array<Role> = []
+  private _preferences: Array<Preference> = []
+  private _proxies: Array<DatabaseProxy> = []
 
   // Singleton pattern requires a private constructor to prevent instantiation
   private constructor () { /* empty */ }
@@ -61,14 +63,21 @@ export class Webade {
     return Webade.instance().proxies()
   }
 
-  public static getPreference (set: string, preference: string): string {
-    return Webade.instance().preferences().find(p => p.PREFERENCE_SET.toLowerCase() === set.toLowerCase() && p.PREFERENCE_NAME.toLowerCase() === preference.toLowerCase())
+  public static getPreference (set: string, preference: string): Preference | undefined {
+    return Webade.instance().preferences().find(p => p.preferenceSetName?.toLowerCase() === set.toLowerCase() && p.preferenceName?.toLowerCase() === preference.toLowerCase())
   }
 
-  public static getPreferenceValue (set: string, preference: string): string {
-    return Webade.instance().preferences().find(p => p.PREFERENCE_SET.toLowerCase() === set.toLowerCase() && p.PREFERENCE_NAME.toLowerCase() === preference.toLowerCase()).PREFERENCE_VALUE
+  public static getPreferenceValue (set: string, preference: string): any {
+    const pref = Webade.instance().preferences().find(p => p.preferenceSetName?.toLowerCase() === set.toLowerCase() && p.preferenceName?.toLowerCase() === preference.toLowerCase())
+    return pref ? pref.preferenceValue : null
   }
 
+  /**
+   * You'd likely want to replace this approach over to use
+   * the webade API checktoken
+   * @param token The token
+   * @returns 
+   */
   public static async fetchTokenJWT (token: string): Promise<string | null> {
     let jwtToken = null
     let connection
@@ -114,7 +123,7 @@ export class Webade {
         connectString: AppProperties.get('webade.bootstrap.connection') as string
       })
 
-      // load the queries
+      // load the queries from the query configs
       mybatisMapper.createMapper([path.resolve(__dirname, '../query-configs/webade-queries.xml')])
 
       this._application = null
@@ -129,7 +138,7 @@ export class Webade {
       if (application && application.rows) {
         for (let row of application.rows) {
           console.log(`Webade Application ${acronym} found`)
-          this._application = row
+          this._application = new Application(row)
         }
         // Fetch Actions
         console.log('Fetching Actions...')
@@ -137,7 +146,7 @@ export class Webade {
         const actions = await connection.execute(sql, [], { outFormat: oracledb.OUT_FORMAT_OBJECT })
         if (actions && actions.rows) {
           for (let row of actions.rows) {
-            this._actions.push(row)
+            this._actions.push(new Action(row))
           }
         }
         // Fetch Roles
@@ -146,7 +155,7 @@ export class Webade {
         const roles = await connection.execute(sql, [], { outFormat: oracledb.OUT_FORMAT_OBJECT })
         if (roles && roles.rows) {
           for (let row of roles.rows) {
-            this._roles.push(row)
+            this._roles.push(new Role(row))
           }
         }
         // Fetch properties
@@ -155,7 +164,7 @@ export class Webade {
         const preferences = await connection.execute(sql, [], { outFormat: oracledb.OUT_FORMAT_OBJECT })
         if (preferences && preferences.rows) {
           for (let row of preferences.rows) {
-            this._preferences.push(row)
+            this._preferences.push(new Preference(row))
           }
         }
         // Fetch Proxies
@@ -164,7 +173,18 @@ export class Webade {
         const proxies = await connection.execute(sql, [], { outFormat: oracledb.OUT_FORMAT_OBJECT })
         if (proxies && proxies.rows) {
           for (let row of proxies.rows) {
-            this._proxies.push(row)
+            const proxy = new DatabaseProxy(row)
+            this._proxies.push(proxy)
+            // Create proxy pools
+            if (proxy.poolConnections && proxy.proxyId && proxy.dbDriver?.toUpperCase() === 'ORACLE') {
+              await oracledb.createPool({
+                user: proxy.dbUserId || undefined,
+                password: proxy.dbPassword || undefined,
+                connectString: proxy.connectionInfo || undefined,
+                poolAlias: proxy.proxyId
+              })
+            }
+            // handle other types, postgres etc...
           }
         }
 

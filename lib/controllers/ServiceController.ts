@@ -1,7 +1,8 @@
 import { ValidateError } from '../model/ValidateError'
 import { ServiceEndpoints } from '../endpoints/ServiceEndpoints'
 import { Controller } from '../core/Controller'
-import { Route, SuccessResponse, Response, Security, Get, Path, Query, NoCache, Cors, Body, Post } from '../core/Decorators'
+import { Route, SuccessResponse, Request, Response, Security, Get, Path, Query, NoCache, Cors, Body, Post, UploadSingle, MultiPartFormMixed, Files } from '../core/Decorators'
+import multer = require('multer')
 
 /**
  * This is a Service Endpoint Controller
@@ -50,7 +51,7 @@ export class ServiceController extends Controller {
   @NoCache()
   @Cors({ origin: false })
   public async getPing (@Query('pong') pongMessage: string) {
-    const endpoints = new ServiceEndpoints()  
+    const endpoints = new ServiceEndpoints()
     return endpoints.getPing(pongMessage)
   }
 
@@ -59,8 +60,17 @@ export class ServiceController extends Controller {
   @NoCache()
   @Cors({ origin: false })
   public async echoBody (@Body() bodyObject: any) {
-    const endpoints = new ServiceEndpoints()  
+    const endpoints = new ServiceEndpoints()
     return endpoints.echoBody(bodyObject)
+  }
+
+  @Post('form')
+  @SuccessResponse('201', 'Created')
+  @NoCache()
+  @MultiPartFormMixed([{ name: 'image1', maxCount: 1 }, { name: 'image2', maxCount: 1 }], { storage: multer.memoryStorage() })
+  @Cors({ origin: false })
+  public async uploadForm (@Files() files: any) {
+    return { uploadedFiles: JSON.stringify(files)}
   }
 
   @Get('healthCheck')

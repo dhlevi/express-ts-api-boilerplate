@@ -35,6 +35,7 @@ export class RouteManager {
    * @returns result
    */
   public static initializeRoutes (router: Router): boolean {
+    console.info('Initializing Routes:')
     return RouteManager.instance().initializeRoutes(router)
   }
 
@@ -106,7 +107,8 @@ export class RouteManager {
       for (const [key, controller] of this.controllers.entries()) {
         console.log('Building routes for controller: ' + key)
         for (const endpoint of controller.endpoints) {
-          const route = controller.route + endpoint.route
+          let route = controller.route + endpoint.route
+          route = route.replace('//', '/').trim()
           console.log(`Creating ${endpoint.type.toUpperCase()} route for ${controller.name + '.' + endpoint.name} @ ${route}`)
           if (endpoint.type === 'get') {
             router.get(route, ...endpoint.middleware, buildRouteHandler(endpoint.endpointFunc, endpoint.success, endpoint.parameters))
@@ -303,6 +305,12 @@ function buildRouteHandler (func: any, status: number | string, parameters: Arra
           args[param.index] = req.query[param.argName]
         } else if (param.type === 'body') {
           args[param.index] = req.body
+        } else if (param.type === 'request') {
+          args[param.index] = req
+        } else if (param.type === 'files') {
+          args[param.index] = Object.prototype.hasOwnProperty.call(req, 'file') ? req.file :
+                              Object.prototype.hasOwnProperty.call(req, 'files') ? req.files :
+                              null
         }
       }
 

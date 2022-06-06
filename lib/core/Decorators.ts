@@ -1,9 +1,9 @@
-import { RouteManager } from './RouteManager';
+import { RouteManager } from './RouteManager'
 import cors = require('cors')
 import {HttpStatusCodeLiteral, HttpStatusCodeStringLiteral, OtherValidOpenApiHttpStatusCode } from 'tsoa'
-import { requiredScopes, validJWTNeeded } from '../middleware/AuthMiddleware';
-import { noCache } from '../middleware/NoCacheMiddleware';
-import multer = require('multer');
+import { requiredScopes, validJWTNeeded } from '../middleware/AuthMiddleware'
+import { noCache } from '../middleware/NoCacheMiddleware'
+import multer = require('multer')
 
 /*
  * The Decorators file creates functions used as decorators for your controllers
@@ -15,7 +15,8 @@ import multer = require('multer');
 
 
 /**
- * Apply Multer middleware to an endpoint for single file download
+ * Apply Multer middleware to an endpoint for single file download. See
+ * http://expressjs.com/en/resources/middleware/multer.html for multer options
  * @returns 
  */
 export function UploadSingle (parameter: string, multerOptions?: multer.Options | undefined): Function {
@@ -26,7 +27,8 @@ export function UploadSingle (parameter: string, multerOptions?: multer.Options 
 }
 
 /**
- * Apply Multer middleware to an endpoint for file downloads
+ * Apply Multer middleware to an endpoint for file downloads. See
+ * http://expressjs.com/en/resources/middleware/multer.html for multer options
  * @returns 
  */
 export function UploadSingleArray (parameter: string, count: number, multerOptions?: multer.Options | undefined): Function {
@@ -37,7 +39,8 @@ export function UploadSingleArray (parameter: string, count: number, multerOptio
 }
 
 /**
- * Apply Multer middleware to an endpoint for file downloads
+ * Apply Multer middleware to an endpoint for file downloads. See
+ * http://expressjs.com/en/resources/middleware/multer.html for multer options
  * @returns 
  */
 export function MultiPartFormMixed (parameters: Array<multer.Field>, multerOptions?: multer.Options | undefined): Function {
@@ -48,7 +51,8 @@ export function MultiPartFormMixed (parameters: Array<multer.Field>, multerOptio
 }
 
 /**
- * Apply Nulter middleware to an endpoint for file 
+ * Apply Multer middleware to an endpoint for file. See
+ * http://expressjs.com/en/resources/middleware/multer.html for multer options
  * @returns 
  */
 export function MultiPartFormText (): Function {
@@ -88,7 +92,7 @@ export function Cors (options?: cors.CorsOptions | cors.CorsOptionsDelegate<cors
 export function Get (path: string): Function {
   return function getDecorator(target: any, property: any, descriptor: any) {
     const route = '/' + path.replace('{', ':').replace('}', '')
-    RouteManager.registerEndpoint(target, property, route.replace('//', '/'), 'get')
+    RouteManager.registerEndpoint(target, property, route.replace('//', '/').trim(), 'get')
     return descriptor
   }
 }
@@ -101,7 +105,7 @@ export function Get (path: string): Function {
 export function Post (path: string): Function {
   return function postDecorator(target: any, property: any, descriptor: any) {
     const route = '/' + path.replace('{', ':').replace('}', '')
-    RouteManager.registerEndpoint(target, property, route.replace('//', '/'), 'post')
+    RouteManager.registerEndpoint(target, property, route.replace('//', '/').trim(), 'post')
     return descriptor
   }
 }
@@ -114,7 +118,7 @@ export function Post (path: string): Function {
 export function Put (path: string): Function {
   return function putDecorator(target: any, property: any, descriptor: any) {
     const route = '/' + path.replace('{', ':').replace('}', '')
-    RouteManager.registerEndpoint(target, property, route.replace('//', '/'), 'put')
+    RouteManager.registerEndpoint(target, property, route.replace('//', '/').trim(), 'put')
     return descriptor
   }
 }
@@ -127,7 +131,7 @@ export function Put (path: string): Function {
 export function Patch (path: string): Function {
   return function patchDecorator(target: any, property: any, descriptor: any) {
     const route = '/' + path.replace('{', ':').replace('}', '')
-    RouteManager.registerEndpoint(target, property, route.replace('//', '/'), 'patch')
+    RouteManager.registerEndpoint(target, property, route.replace('//', '/').trim(), 'patch')
     return descriptor
   }
 }
@@ -140,7 +144,7 @@ export function Patch (path: string): Function {
 export function Delete (path: string): Function {
   return function deleteDecorator(target: any, property: any, descriptor: any) {
     const route = '/' + path.replace('{', ':').replace('}', '')
-    RouteManager.registerEndpoint(target, property, route.replace('//', '/'), 'delete')
+    RouteManager.registerEndpoint(target, property, route.replace('//', '/').trim(), 'delete')
     return descriptor
   }
 }
@@ -154,7 +158,7 @@ export function Delete (path: string): Function {
 export function Route (path: string): Function {
   return function routeDecorator(target: any) {
     const route = '/' + path
-    RouteManager.registerController(target, route.replace('//', '/'))
+    RouteManager.registerController(target, route.replace('//', '/').trim())
     return target
   }
 }
@@ -245,5 +249,77 @@ export function Body(name?: string | undefined): Function {
   return function bodyDecorator(target: any, property: any, argIndex: any) {
     RouteManager.registerArgument(target, property, name, argIndex, 'body')
     return argIndex
+  }
+}
+
+/**
+ * Declare this attributes source to be the original Reqeust object.
+ * The request object will also contain the body
+ * @returns 
+ */
+export function Request(): Function {
+  return function bodyDecorator(target: any, property: any, argIndex: any) {
+    RouteManager.registerArgument(target, property, undefined, argIndex, 'request')
+    return argIndex
+  }
+}
+
+/**
+ * Declare this attributes source to be the file/files result from using one of
+ * the multer multipart file uploads
+ * @returns 
+ */
+export function Files(): Function {
+  return function bodyDecorator(target: any, property: any, argIndex: any) {
+    RouteManager.registerArgument(target, property, undefined, argIndex, 'files')
+    return argIndex
+  }
+}
+
+/**
+ * Adding a tag to the swagger document
+ * @param values The list of tags
+ * @returns 
+ */
+export function Tags (...values: string[]): Function {
+  return function tagDecorator(target: any, property: any, descriptor: any) {
+    // ignored, just for supplying tags on swagger via tsoa
+    return descriptor
+  }
+}
+
+/**
+ * Adding an OperationId to the swagger document
+ * @param id The operation id
+ * @returns 
+ */
+export function OperationId (id: string): Function {
+  return function idDecorator(target: any, property: any, descriptor: any) {
+    // ignored, just for supplying opid on swagger via tsoa
+    return descriptor
+  }
+}
+
+/**
+ * Flag an endpoint or argument as Deprecated
+ * @returns 
+ */
+export function Deprecated (): Function {
+  return function deprecatedDecorator(target: any, property: any, descriptor: any) {
+    // ignored, just for supplying deprecation flag on swagger via tsoa
+    // we don't want this to actually affect the transaction
+    return descriptor
+  }
+}
+
+/**
+ * Register this endpoint, but do not add it to the generated swagger.
+ * Only use this if you're really sure...
+ * @returns 
+ */
+export function Hidden (): Function {
+  return function hiddenDecorator(target: any, property: any, descriptor: any) {
+    // ignored, just for supplying hidden flag on swagger via tsoa
+    return descriptor
   }
 }

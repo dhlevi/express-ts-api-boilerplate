@@ -105,6 +105,21 @@ export class ExpressServer {
         scriptSrc: ["'unsafe-inline'", "'self'"]
       }
     }))
+    
+    server.use(helmet.crossOriginEmbedderPolicy());
+    server.use(helmet.crossOriginOpenerPolicy());
+    server.use(helmet.crossOriginResourcePolicy());
+    server.use(helmet.dnsPrefetchControl());
+    server.use(helmet.expectCt());
+    server.use(helmet.frameguard());
+    server.use(helmet.hidePoweredBy());
+    server.use(helmet.hsts());
+    server.use(helmet.ieNoOpen());
+    server.use(helmet.noSniff());
+    server.use(helmet.originAgentCluster());
+    server.use(helmet.permittedCrossDomainPolicies());
+    server.use(helmet.referrerPolicy());
+    server.use(helmet.xssFilter());
 
     server.disable('x-powered-by');
     server.use(function (req, res, next) {

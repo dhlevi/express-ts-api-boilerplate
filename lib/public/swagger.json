@@ -135,6 +135,39 @@
 				}
 			}
 		},
+		"/api/form": {
+			"post": {
+				"operationId": "UploadForm",
+				"responses": {
+					"201": {
+						"description": "Created",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"didItWork": {}
+									},
+									"required": [
+										"didItWork"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {}
+						}
+					}
+				}
+			}
+		},
 		"/api/healthCheck": {
 			"get": {
 				"operationId": "GetHealth",
