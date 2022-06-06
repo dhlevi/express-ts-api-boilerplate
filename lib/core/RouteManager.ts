@@ -8,6 +8,10 @@ import * as express from 'express'
  * Decorators to your class, functions and function arguments, the Route Definitions will be
  * created and updated. Once your controllers are instantiated the routes will be generated
  * and applied to the server.
+ * Note: This is a singleton for now, but it will likey change in the near future. Doesn't
+ * change how you use it, mind you, but the "better" way to do this instead of singleton would
+ * be to apply the decorator attributes on controller prototype and inject directly later. The
+ * singleton is a convinience
  */
 export class RouteManager {
   private static _instance: RouteManager
@@ -37,6 +41,18 @@ export class RouteManager {
   public static initializeRoutes (router: Router): boolean {
     console.info('Initializing Routes:')
     return RouteManager.instance().initializeRoutes(router)
+  }
+
+  public static initControllers (...controllers: Array<Controller>): boolean {
+    let result = true
+    for (const controller of controllers) {
+      const name = Object.prototype.hasOwnProperty.call(controller, 'name') ? (controller as any).name : controller.constructor.name
+      result = result && RouteManager.instance().controllers.has(name)
+      // currently just verifies the decorator functions applied the controller and endpoints configs
+      // into the singleton. This will be replaced later to check controller.prototype for embedded
+      // configs and the singleton approach will be removed
+    }
+    return result
   }
 
   /**

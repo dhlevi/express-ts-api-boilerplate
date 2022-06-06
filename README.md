@@ -79,7 +79,7 @@ To ensure your routes to the controller get created, you currently need to updat
 You add your service class to Routes.ts and instantiate it before (BEFORE!!!) the call to `RouteManager.initializeRoutes(router)`
 
 ```Typescript
-const myController = new MyController()
+RouteManager.initControllers(new MyController(), new MyOtherController())
 // other controllers...
 // then...
 RouteManager.initializeRoutes(router)
