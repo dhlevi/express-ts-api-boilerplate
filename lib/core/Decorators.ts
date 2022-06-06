@@ -137,7 +137,7 @@ export function Patch (path: string): Function {
 }
 
 /**
- * Indicator that this function handles a DEELTE request, at the provided route
+ * Indicator that this function handles a DELETE request, at the provided route
  * @param path The route to this request
  * @returns 
  */
@@ -145,6 +145,19 @@ export function Delete (path: string): Function {
   return function deleteDecorator(target: any, property: any, descriptor: any) {
     const route = '/' + path.replace('{', ':').replace('}', '')
     RouteManager.registerEndpoint(target, property, route.replace('//', '/').trim(), 'delete')
+    return descriptor
+  }
+}
+
+/**
+ * Indicator that this function handles a OPTIONS request, at the provided route
+ * @param path The route to this request
+ * @returns 
+ */
+export function Options (path: string): Function {
+  return function optionsDecorator(target: any, property: any, descriptor: any) {
+    const route = '/' + path.replace('{', ':').replace('}', '')
+    RouteManager.registerEndpoint(target, property, route.replace('//', '/').trim(), 'options')
     return descriptor
   }
 }
@@ -206,6 +219,19 @@ export function Security(name: string | { [name: string]: string[]; }, scopes?: 
     }
     // Other handler types for different authentication methods should be declared here. For now
     // I only care about supporting Bearer tokens/scopes with our webade implementation
+    return descriptor
+  }
+}
+
+/**
+ * Explicit flag to ignore security on this endpoint
+ * @param name Type of security to implement
+ * @param scopes Required Scopes
+ * @returns 
+ */
+export function NoSecurity(name: string | { [name: string]: string[]; }, scopes?: string[] | undefined): Function {
+  return function securityDecorator(target: any, property: any, descriptor: any) {
+    // ignored, used by tsoa
     return descriptor
   }
 }
@@ -318,9 +344,9 @@ export function Hidden (): Function {
  * the multer multipart file uploads
  * @returns 
  */
-export function FormField(): Function {
+export function FormField(name?: string): Function {
   return function fieldDecorator(target: any, property: any, argIndex: any) {
-    RouteManager.registerArgument(target, property, undefined, argIndex, 'formField')
+    RouteManager.registerArgument(target, property, name, argIndex, 'formField')
     return argIndex
   }
 }
@@ -345,6 +371,18 @@ export function UploadedFiles(): Function {
 export function UploadedFile(): Function {
   return function uploadFileDecorator(target: any, property: any, argIndex: any) {
     RouteManager.registerArgument(target, property, undefined, argIndex, 'files')
+    return argIndex
+  }
+}
+
+/**
+ * Declare this attributes source to be a value from the request header
+ * the multer multipart file uploads
+ * @returns 
+ */
+export function Header(name?: string | undefined): Function {
+  return function uploadFileDecorator(target: any, property: any, argIndex: any) {
+    RouteManager.registerArgument(target, property, name, argIndex, 'header')
     return argIndex
   }
 }

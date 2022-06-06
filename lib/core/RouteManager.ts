@@ -136,6 +136,8 @@ export class RouteManager {
             router.patch(route, ...endpoint.middleware, buildRouteHandler(endpoint.endpointFunc, endpoint.success, endpoint.parameters))
           } else if (endpoint.type === 'delete') {
             router.delete(route, ...endpoint.middleware, buildRouteHandler(endpoint.endpointFunc, endpoint.success, endpoint.parameters))
+          } else if (endpoint.type === 'options') {
+            router.options(route, ...endpoint.middleware, buildRouteHandler(endpoint.endpointFunc, endpoint.success, endpoint.parameters))
           }
         }
       }
@@ -316,9 +318,9 @@ function buildRouteHandler (func: any, status: number | string, parameters: Arra
       // apply values as needed
       for (const param of parameters) {
         if (param.type === 'path' && req.params[param.argName]) {
-          args[param.index] = req.params[param.argName]
+          args[param.index] = req.params[param.argName] || null
         } else if (param.type === 'query' && req.query[param.argName]) {
-          args[param.index] = req.query[param.argName]
+          args[param.index] = req.query[param.argName] || null
         } else if (param.type === 'body') {
           args[param.index] = req.body
         } else if (param.type === 'request') {
@@ -329,8 +331,10 @@ function buildRouteHandler (func: any, status: number | string, parameters: Arra
           args[param.index] = Object.prototype.hasOwnProperty.call(req, 'file') ? req.file :
                               Object.prototype.hasOwnProperty.call(req, 'files') ? req.files :
                               null
+        } else if (param.type === 'header') {
+          args[param.index] = req.headers[param.argName] || null
         } else {
-          args[param.index] = (req as any)[param.type]
+          args[param.index] = (req as any)[param.type] || null
         }
       }
 
