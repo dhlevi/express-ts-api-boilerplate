@@ -99,4 +99,16 @@ A Decorator exists called `@Security`. Currently it's a basic implementation tha
 
 It's simple for now, so expect these examples to expand to support a broader range, likely with an implementation of the passport library for expressjs. In the meantime, it's pretty simple to add more support to the existing Security decorator for other types if you need them. Just create a new middleware and wire it up in the decorator.
 
+## Default Endpoints
+
+### Health Check
+
+Familiar to anyone who's used our standard Java Spring API templates, included in this example is a default endpoint called `/healthCheck`. Running the Health Check will return some status information about the current health of the application and subcomponents.
+
+You can create your own Health Checks by extending the `HealthValidator` class, and adding instantiating your validator in the `HealthCheckLoader.ts` file in the `./health-checks` folder. Documentation and examples are found there as well.
+
+### OpenAPI
+
+If you use the swagger generator, a swagger.json file will be created by default and placed in the `/public` directory. When your API is running, you can hit the pre-defined `/openapi` endpoint. This will open up a swagger document viewer allowing you to view the generated swagger spec. It's cool, check it out!
+
 ## More to come as I get the time to add things!

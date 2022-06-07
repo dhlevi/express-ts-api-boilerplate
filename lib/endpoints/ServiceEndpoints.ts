@@ -1,5 +1,3 @@
-import * as os from 'os'
-
 /**
  * This is a Service Endpoint provider
  * This class is used to define your endpoint business logic, and will often
@@ -11,7 +9,7 @@ export class ServiceEndpoints {
    * @param text The supplied input to Echo
    * @returns Echo
    */
-  public async getEcho (text: string) {
+  public async getEcho (text: string): Promise<string> {
     return text
   }
 
@@ -20,7 +18,7 @@ export class ServiceEndpoints {
    * @param body
    * @returns 
    */
-  public async echoBody (body: any) {
+  public async echoBody (body: any): Promise<any> {
     return body
   }
 
@@ -28,15 +26,7 @@ export class ServiceEndpoints {
    * A simple Ping message to determine if the API is available and receiving requests
    * @returns Pong
    */
-  public async getPing (pongMessage: string) {
+  public async getPing (pongMessage: string): Promise<string> {
     return pongMessage
-  }
-
-  public async getHealth () {
-    return {
-      status: 'Running',
-      memoryAvailable: Math.ceil(os.totalmem() / 1000000) - Math.ceil((os.totalmem() - os.freemem()) / 1000000),
-      otherModles: 'Could be added here for a more robust health check'
-    }
   }
 }

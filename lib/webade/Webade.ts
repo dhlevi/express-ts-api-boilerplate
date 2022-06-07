@@ -2,7 +2,6 @@ import { Application, Action, Role, Preference, DatabaseProxy } from './WebadeRe
 import mybatisMapper = require('mybatis-mapper')
 import oracledb = require('oracledb')
 import path = require('path')
-import { v4 as uuidv4 } from 'uuid'
 import { AppProperties } from '../core/AppProperties'
 
 /**
@@ -14,7 +13,7 @@ import { AppProperties } from '../core/AppProperties'
  */
 export class Webade {
   private static _instance: Webade
-  private initialized = false
+  private _initialized = false
   private _application: Application | null = null
   private _actions: Array<Action> = []
   private _roles: Array<Role> = []
@@ -31,7 +30,7 @@ export class Webade {
         Webade._instance = new Webade()
       }
 
-      if (!Webade._instance.initialized) {
+      if (!Webade._instance._initialized) {
         console.warn('Webade currently uninitialized')
       }
 
@@ -41,6 +40,10 @@ export class Webade {
   // Static initializers and functions
   public static async initialize (): Promise<void> {
     return Webade.instance().initialize()
+  }
+
+  public static initialized (): boolean {
+    return Webade.instance()._initialized
   }
 
   public static application () {
@@ -87,11 +90,7 @@ export class Webade {
     let connection
     try {
       oracledb.fetchAsString = [ oracledb.CLOB ];
-      connection = await oracledb.getConnection({
-        user: AppProperties.get('webade.bootstrap.user') as string,
-        password: AppProperties.get('webade.bootstrap.password') as string,
-        connectString: AppProperties.get('webade.bootstrap.connection') as string
-      })
+      connection = await oracledb.getPool('webade').getConnection()
 
       const tokens = await connection.execute(`SELECT * from oauth_token_store WHERE token_guid = :token`, [token], { outFormat: oracledb.OUT_FORMAT_OBJECT })
       if (tokens && tokens.rows) {
@@ -190,14 +189,25 @@ export class Webade {
                 user: proxy.dbUserId || undefined,
                 password: proxy.dbPassword || undefined,
                 connectString: proxy.connectionInfo || undefined,
-                poolAlias: proxy.proxyId
+                poolAlias: proxy.proxyId,
+                poolMax: parseInt(proxy.maxConnections as string),
+                poolMin: parseInt(proxy.minConnections as string)
               })
             }
             // handle other types, postgres etc...
           }
         }
 
-        this.initialized = true
+        await oracledb.createPool({
+          user: AppProperties.get('webade.bootstrap.user') as string,
+          password: AppProperties.get('webade.bootstrap.password') as string,
+          connectString: AppProperties.get('webade.bootstrap.connection') as string,
+          poolAlias: 'webade',
+          poolMax: 50,
+          poolMin: 5
+        })
+
+        this._initialized = true
       } else {
         console.error(`Failed to configure webade. Acronym '${acronym}' does not exist`)
       }

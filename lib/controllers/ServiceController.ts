@@ -1,7 +1,8 @@
-import { ValidateError } from '../model/ValidateError'
+import { HealthService } from './../core/HealthService';
+import { ValidateError } from '../core/model/ValidateError'
 import { ServiceEndpoints } from '../endpoints/ServiceEndpoints'
 import { Controller } from '../core/Controller'
-import { Route, SuccessResponse, Request, Response, Security, Get, Path, Query, NoCache, Cors, Body, Post, MultiPartFormMixed, Hidden, UploadedFiles } from '../core/Decorators'
+import { Route, SuccessResponse, Response, Security, Get, Path, Query, NoCache, Cors, Body, Post, MultiPartFormMixed, Hidden, UploadedFiles } from '../core/Decorators'
 import multer = require('multer')
 
 /**
@@ -71,15 +72,5 @@ export class ServiceController extends Controller {
   @Cors({ origin: false })
   public async uploadForm (@Hidden() @UploadedFiles() files: any) {
     return { uploadedFiles: JSON.stringify(files)}
-  }
-
-  @Get('healthCheck')
-  @SuccessResponse('200', 'OK')
-  @Security('BearerAuth', ['some', 'required', 'scopes'])
-  @NoCache()
-  @Cors({ origin: false })
-  public async getHealth () {
-    const endpoints = new ServiceEndpoints()
-    return endpoints.getHealth()
   }
 }
