@@ -124,7 +124,7 @@ export class RouteManager {
         console.log('Building routes for controller: ' + key)
         for (const endpoint of controller.endpoints) {
           let route = controller.route + endpoint.route
-          route = route.replace('//', '/').trim()
+          route = route.replace(/\/\//g, '/').trim()
           console.log(`Creating ${endpoint.type.toUpperCase()} route for ${controller.name + '.' + endpoint.name} @ ${route}`)
           if (endpoint.type === 'get') {
             router.get(route, ...endpoint.middleware, buildRouteHandler(endpoint.endpointFunc, endpoint.success, endpoint.parameters))
