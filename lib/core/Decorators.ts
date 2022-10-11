@@ -43,7 +43,7 @@ export function UploadSingleArray (parameter: string, count: number, multerOptio
  * http://expressjs.com/en/resources/middleware/multer.html for multer options
  * @returns 
  */
-export function MultiPartFormMixed (parameters: Array<multer.Field>, multerOptions?: multer.Options | undefined): Function {
+export function MultiPartFormMixed (parameters: multer.Field[], multerOptions?: multer.Options | undefined): Function {
   return function multipartDecorator(target: any, property: any, descriptor: any) {
     RouteManager.registerEndpointMiddleware(target, property, multer(multerOptions).fields(parameters))
     return descriptor
@@ -91,8 +91,8 @@ export function Cors (options?: cors.CorsOptions | cors.CorsOptionsDelegate<cors
  */
 export function Get (path: string): Function {
   return function getDecorator(target: any, property: any, descriptor: any) {
-    const route = '/' + path.replace('{', ':').replace('}', '')
-    RouteManager.registerEndpoint(target, property, route.replace('//', '/').trim(), 'get')
+    const route = '/' + path.replace(/{/g, ':').replace(/}/g, '')
+    RouteManager.registerEndpoint(target, property, route.replace(/\/\//g, '/').trim(), 'get')
     return descriptor
   }
 }
@@ -104,8 +104,8 @@ export function Get (path: string): Function {
  */
 export function Post (path: string): Function {
   return function postDecorator(target: any, property: any, descriptor: any) {
-    const route = '/' + path.replace('{', ':').replace('}', '')
-    RouteManager.registerEndpoint(target, property, route.replace('//', '/').trim(), 'post')
+    const route = '/' + path.replace(/{/g, ':').replace(/}/g, '')
+    RouteManager.registerEndpoint(target, property, route.replace(/\/\//g, '/').trim(), 'post')
     return descriptor
   }
 }
@@ -117,8 +117,8 @@ export function Post (path: string): Function {
  */
 export function Put (path: string): Function {
   return function putDecorator(target: any, property: any, descriptor: any) {
-    const route = '/' + path.replace('{', ':').replace('}', '')
-    RouteManager.registerEndpoint(target, property, route.replace('//', '/').trim(), 'put')
+    const route = '/' + path.replace(/{/g, ':').replace(/}/g, '')
+    RouteManager.registerEndpoint(target, property, route.replace(/\/\//g, '/').trim(), 'put')
     return descriptor
   }
 }
@@ -130,8 +130,8 @@ export function Put (path: string): Function {
  */
 export function Patch (path: string): Function {
   return function patchDecorator(target: any, property: any, descriptor: any) {
-    const route = '/' + path.replace('{', ':').replace('}', '')
-    RouteManager.registerEndpoint(target, property, route.replace('//', '/').trim(), 'patch')
+    const route = '/' + path.replace(/{/g, ':').replace(/}/g, '')
+    RouteManager.registerEndpoint(target, property, route.replace(/\/\//g, '/').trim(), 'patch')
     return descriptor
   }
 }
@@ -143,8 +143,8 @@ export function Patch (path: string): Function {
  */
 export function Delete (path: string): Function {
   return function deleteDecorator(target: any, property: any, descriptor: any) {
-    const route = '/' + path.replace('{', ':').replace('}', '')
-    RouteManager.registerEndpoint(target, property, route.replace('//', '/').trim(), 'delete')
+    const route = '/' + path.replace(/{/g, ':').replace(/}/g, '')
+    RouteManager.registerEndpoint(target, property, route.replace(/\/\//g, '/').trim(), 'delete')
     return descriptor
   }
 }
@@ -156,8 +156,8 @@ export function Delete (path: string): Function {
  */
 export function Options (path: string): Function {
   return function optionsDecorator(target: any, property: any, descriptor: any) {
-    const route = '/' + path.replace('{', ':').replace('}', '')
-    RouteManager.registerEndpoint(target, property, route.replace('//', '/').trim(), 'options')
+    const route = '/' + path.replace(/{/g, ':').replace(/}/g, '')
+    RouteManager.registerEndpoint(target, property, route.replace(/\/\//g, '/').trim(), 'options')
     return descriptor
   }
 }
@@ -171,7 +171,7 @@ export function Options (path: string): Function {
 export function Route (path: string): Function {
   return function routeDecorator(target: any) {
     const route = '/' + path
-    RouteManager.registerController(target, route.replace('//', '/').trim())
+    RouteManager.registerController(target, route.replace(/\/\//g, '/').trim())
     return target
   }
 }
@@ -284,7 +284,7 @@ export function Body(name?: string | undefined): Function {
  * @type An argument to extract from the request, usually for fetching multer files on upload
  * @returns 
  */
-export function Request(type: string | null): Function {
+export function Request(type: string | null = null): Function {
   return function requestDecorator(target: any, property: any, argIndex: any) {
     RouteManager.registerArgument(target, property, undefined, argIndex, type || 'request')
     return argIndex
