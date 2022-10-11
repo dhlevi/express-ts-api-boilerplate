@@ -317,9 +317,9 @@ function buildRouteHandler (func: any, status: number | string, parameters: Arra
       // iterate over our parameter list for this endpoint and 
       // apply values as needed
       for (const param of parameters) {
-        if (param.type === 'path' && req.params[param.argName]) {
+        if (param.type === 'path') {
           args[param.index] = req.params[param.argName] || null
-        } else if (param.type === 'query' && req.query[param.argName]) {
+        } else if (param.type === 'query') {
           args[param.index] = req.query[param.argName] || null
         } else if (param.type === 'body') {
           args[param.index] = req.body
