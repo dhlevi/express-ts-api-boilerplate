@@ -9,5 +9,16 @@ export const scheduledTasks: Task[] = [
   }, false),
   new Task('Example Cron Schedule', '* * * * *', () => {
     console.log('An example task with a 1 minute cron job')
-  }, false)
+  }, false),
+  {
+    name: 'Example Cron with Options',
+    cron: '*/5 * * * 1',
+    cronOptions: {
+      scheduled: true,
+      timezone: "America/Sao_Paulo"
+    },
+    callback: () => {
+      console.log('Ill only run on Monday!')
+    }
+  }
 ]

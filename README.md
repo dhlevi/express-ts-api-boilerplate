@@ -111,4 +111,62 @@ You can create your own Health Checks by extending the `HealthValidator` class, 
 
 If you use the swagger generator, a swagger.json file will be created by default and placed in the `/public` directory. When your API is running, you can hit the pre-defined `/openapi` endpoint. This will open up a swagger document viewer allowing you to view the generated swagger spec. It's cool, check it out!
 
+## Scheduled Tasks
+
+The API has built in scheduled task support, using the `TaskManager` service. The TaskManager is initialized on app startup with any preconfigured tasks, or you can add them at runtime.
+
+In the `scheduled-tasks` folder is a class called `TaskLoader.ts`. This class will be called when TaskManager initializes, and any predefined scheduled tasks will automatically wire up. There are a number of examples in the TaskLoader already.
+
+A Scheduled Task is created by instantiating a `Task` type. A `Task` is made up of the following attributes:
+
+- A Name
+- A Callback Function
+- A numeric interval (in milliseconds) or cron expression
+- If you're using a numeric interval, a loop flag that defaults to `true`. If `false`, your task will only run once after the timeout expires
+- cron job settings:
+
+For example, display the log message every 10 seconds:
+
+```typescript
+export const scheduledTasks: Task[] = [
+  new Task('Example Interval', 10000, () => {
+    console.log('An example task with a 10 second loop')
+  })
+]
+```
+
+or, display the log message every 5 minutes, but only run on Mondays:
+
+```typescript
+export const scheduledTasks: Task[] = [
+  new Task('Example Interval', '*/5 * * * 1', () => {
+    console.log('An example task with a cron expression')
+  })
+]
+```
+
+As mentioned, cron expressions have additional options. Two of them, to be specific:
+
+```typescript
+new Task('Example Cron with Options', '*/5 * * * 1', myCallbackFunction, false, {
+   scheduled: true,
+   timezone: "America/Sao_Paulo"
+ })
+ /* or */
+ const task: Task = {
+    name: 'Example Cron with Options',
+    cron: '*/5 * * * 1',
+    cronOptions: {
+      scheduled: true,
+      timezone: "America/Sao_Paulo"
+    },
+    callback: myCallbackFunction
+  }
+```
+
+The `scheduled` option determines if the schedule will be started by default. If you set it to false, you need to manually start it by calling `TaskManager.restartTask('<name>')`. Useful for ensuring a time delay on starting the job if you need some additional initializing to occur first
+
+The `timezone` option identifies which timezone the cron schedule should use. By default, it will use your machines timezone settings, but if you want your job to run at an interval specified by a different timezone, set that option here.
+
 ## More to come as I get the time to add things!
+
