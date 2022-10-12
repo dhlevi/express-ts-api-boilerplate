@@ -3,6 +3,7 @@ import { Application } from './Application'
 import * as os from 'os'
 import * as fs from 'fs'
 import { AppProperties } from './core/AppProperties'
+import { TaskManager } from './core/TaskManager';
 
 /**
  * Entrypoint for bootstrapping and starting the application.
@@ -35,9 +36,16 @@ console.error = function (...args) {
 
 console.log('### INITIALIZING APPLICATION ###')
 
-// initialize Webade. await?
-Webade.initialize().then(() => {
-  // if you want to prevent the server from starting if the webade init fails
+initialize().then(() => {
+  console.log('API Initialized!')
+}).catch(err => {
+  console.error('Failed to initilize API: ' + err)
+})
+
+async function initialize () {
+  await Webade.initialize()
+  await TaskManager.initialize()
+    // if you want to prevent the server from starting if the webade init fails
   // you can handle that scenario here. For now, just continue with launching
   // the server regardless
 
@@ -49,7 +57,7 @@ Webade.initialize().then(() => {
     console.info(`Current memory allocation: ${Math.ceil((os.totalmem() - os.freemem()) / 1000000)}mb of ${Math.ceil(os.totalmem() / 1000000)}mb`)
     console.info(`The application was started: http://localhost:${port}. Kill it using Ctrl + C`)
   })
-})
+}
 
 /**
  * Handler for Logging override
