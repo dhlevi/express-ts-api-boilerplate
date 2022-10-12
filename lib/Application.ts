@@ -1,3 +1,4 @@
+import { TaskManager } from './core/TaskManager'
 import { ExpressServer } from './ExpressServer'
 
 /**
@@ -58,6 +59,7 @@ export class Application {
     Promise.resolve()
     .then(() => express.kill())
     .then(() => {
+      TaskManager.clearTasks()
       console.info('Shutdown complete')
       process.exit(exitCode)
     })

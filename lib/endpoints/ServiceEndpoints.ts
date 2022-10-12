@@ -1,31 +1,32 @@
-import { NextFunction, Request, Response } from 'express'
-
 /**
- * This is a Service Endpoint provider / Controller
- * This class is used to define your exportable functions that can in turn be bound
- * to the initialized Express server. You do not define Middleware or API endpoints
- * here, which allows for cleaner re-use or controller changing.
- *
- * This provided example is simple, with some exported public endpoint functions,
- * in practice these classes will likely be more complicated. As they get more complex
- * it's recommended to use this class as a provider only, and wire the functions into
- * detailed controllers, so the code doesn't get to cluttered with unrelated pieces.
+ * This is a Service Endpoint provider
+ * This class is used to define your endpoint business logic, and will often
+ * be 1-1 mapping on the related Controller class.
  */
 export class ServiceEndpoints {
-  public getEcho = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const echo = req.params.echo
-      res.status(200).json(echo)
-    } catch (err) {
-      next(err)
-    }
+  /**
+   * A Simple Echo endpoint that echoes the passed in string on the path
+   * @param text The supplied input to Echo
+   * @returns Echo
+   */
+  public async getEcho (text: string): Promise<string> {
+    return text
   }
 
-  public getPing = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      res.status(200).json('pong')
-    } catch (err) {
-      next(err)
-    }
+  /**
+   * A simple echo that returns the body
+   * @param body
+   * @returns 
+   */
+  public async echoBody (body: any): Promise<any> {
+    return body
+  }
+
+  /**
+   * A simple Ping message to determine if the API is available and receiving requests
+   * @returns Pong
+   */
+  public async getPing (pongMessage: string): Promise<string> {
+    return pongMessage
   }
 }
