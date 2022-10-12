@@ -168,5 +168,7 @@ The `scheduled` option determines if the schedule will be started by default. If
 
 The `timezone` option identifies which timezone the cron schedule should use. By default, it will use your machines timezone settings, but if you want your job to run at an interval specified by a different timezone, set that option here.
 
+Next update to the task scheduler will likely be replacing some functionality with https://github.com/breejs/bree, which will allow for scheduled tasks on worker threads.
+
 ## More to come as I get the time to add things!
 
