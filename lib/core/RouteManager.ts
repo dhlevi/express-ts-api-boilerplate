@@ -1,6 +1,7 @@
 import { Controller } from './Controller';
 import { Router } from "express"
 import * as express from 'express'
+import { ApiResponse } from './model/ApiResponse';
 
 /**
  * The RouteManager is a Singleton control for the creation and registration of API Routes
@@ -303,7 +304,7 @@ export class ParameterDefinition {
  * with parsing your service constroller functions for auto-mapping
  * attributes to path, query and body params.
  */
-function buildRouteHandler (func: any, status: number | string, parameters: Array<ParameterDefinition>) {
+function buildRouteHandler (func: Function | null, status: number | string, parameters: Array<ParameterDefinition>) {
   return async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     try {
       // Extract the function arguments
@@ -339,13 +340,21 @@ function buildRouteHandler (func: any, status: number | string, parameters: Arra
       }
 
       // handle the endpoint function with the defined arguments
-      const result = await func(...args)
+      if (func !== null) {
+        const result = await func(...args)
 
-      // return the status and resulting json message
-      const finalStatus = typeof status === 'string' ? parseInt(status) : status
-      res.status(finalStatus).json(result)
+        // Returning an API Response object will override
+        // the provided default response code
+        if (result instanceof ApiResponse) {
+          res.status(result.status).json(result.responseBody)
+        } else {
+          // return the status and resulting json message
+          const finalStatus = typeof status === 'string' ? parseInt(status) : status
+          res.status(finalStatus).json(result)
+        }
+      }
     } catch (err) {
-      console.error('Route Handler reported error from execution of ' + func.name + ': ' + err)
+      console.error('Route Handler reported error from execution of ' + (func ? func.name : 'Undefined Callback') + ': ' + err)
       next(err)
     }
   }

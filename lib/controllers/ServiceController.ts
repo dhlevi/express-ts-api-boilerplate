@@ -26,6 +26,8 @@ import multer = require('multer')
  * so your business logic can focus on that. Obviously the examples here are so
  * simple that it seems a bit silly.
  */
+
+const endpoints = new ServiceEndpoints()
 @Route('api')
 export class ServiceController extends Controller {
   /**
@@ -39,7 +41,6 @@ export class ServiceController extends Controller {
   @NoCache()
   @Cors({ origin: false })
   public async getEcho (@Path() echo: string) {
-    const endpoints = new ServiceEndpoints()
     return endpoints.getEcho(echo)
   }
 
@@ -52,7 +53,6 @@ export class ServiceController extends Controller {
   @NoCache()
   @Cors({ origin: false })
   public async getPing (@Query('pong') pongMessage: string) {
-    const endpoints = new ServiceEndpoints()
     return endpoints.getPing(pongMessage)
   }
 
@@ -61,7 +61,6 @@ export class ServiceController extends Controller {
   @NoCache()
   @Cors({ origin: false })
   public async echoBody (@Body() bodyObject: any) {
-    const endpoints = new ServiceEndpoints()
     return endpoints.echoBody(bodyObject)
   }
 
