@@ -183,50 +183,6 @@
 					}
 				}
 			}
-		},
-		"/api/healthCheck": {
-			"get": {
-				"operationId": "GetHealth",
-				"responses": {
-					"200": {
-						"description": "OK",
-						"content": {
-							"application/json": {
-								"schema": {
-									"properties": {
-										"otherModles": {
-											"type": "string"
-										},
-										"memoryAvailable": {
-											"type": "number",
-											"format": "double"
-										},
-										"status": {
-											"type": "string"
-										}
-									},
-									"required": [
-										"otherModles",
-										"memoryAvailable",
-										"status"
-									],
-									"type": "object"
-								}
-							}
-						}
-					}
-				},
-				"security": [
-					{
-						"BearerAuth": [
-							"some",
-							"required",
-							"scopes"
-						]
-					}
-				],
-				"parameters": []
-			}
 		}
 	},
 	"servers": [
