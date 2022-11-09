@@ -33,6 +33,25 @@ export class RouteManager {
       return RouteManager._instance
   }
 
+  public static buildLinks (): RelLink[] {
+    const links: RelLink[] = []
+    for (const controller of RouteManager.instance().controllers.values()) {
+      for (const endpoint of controller.endpoints) {
+        const link: RelLink = { method: endpoint.type.toUpperCase(), url: `${controller.route}${endpoint.route === '/' ? '' : endpoint.route}`}
+
+        for (let i = 0; i < endpoint.parameters.length; i++) {
+          const param = endpoint.parameters[i]
+          if (param.type === 'query') {
+            link.url += `${i === 0 ? '?' : '&'}${param.argName}=`
+          }
+        }
+
+        links.push(link)
+      }
+    }
+    return links
+  }
+
   /**
    * Initialize the routes from the provided controller
    * details. Can only be done once.
@@ -272,6 +291,7 @@ export class RouteManager {
 
 /*
  * Route definition model for Primary controller, endpoint, and arguments
+ * These are not types mainly so we can add sensible defaults where needed
  */
 
 export class RouteDefintion {
@@ -297,6 +317,11 @@ export class ParameterDefinition {
   public argName: string = ''
   public type: string = ''
   public index: number = -1
+}
+
+export class RelLink {
+  public method: string = ''
+  public url: string = ''
 }
 
 /**

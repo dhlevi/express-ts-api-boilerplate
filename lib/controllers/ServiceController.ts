@@ -1,8 +1,7 @@
-import { HealthService } from './../core/HealthService';
 import { ValidateError } from '../core/model/ValidateError'
-import { ServiceEndpoints } from '../endpoints/ServiceEndpoints'
+import { ServiceEndpoints } from '../services/ServiceEndpoints'
 import { Controller } from '../core/Controller'
-import { Route, SuccessResponse, Response, Security, Get, Path, Query, NoCache, Cors, Body, Post, MultiPartFormMixed, Hidden, UploadedFiles } from '../core/Decorators'
+import { Route, SuccessResponse, Response, Get, Path, Query, NoCache, Cors, Body, Post, MultiPartFormMixed, Hidden, UploadedFiles } from '../core/Decorators'
 import multer = require('multer')
 
 /**

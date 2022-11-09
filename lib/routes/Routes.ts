@@ -40,4 +40,18 @@ if (!RouteManager.initializeRoutes(router)) {
 // as needed in the standard express js way
 // router.<method>('route', ...middleware, function)
 
+// Finally, we can create the top level endpoint
+console.info('Adding root top level endpoint ...')
+router.use('/', (_req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  res.status(200).json({
+    service: 'WFWX Datamart API',
+    links: [
+      { method: 'GET', url: '/'},
+      { method: 'GET', url: '/healthCheck'},
+      { method: 'GET', url: '/openapi'},
+      ...RouteManager.buildLinks()
+    ]
+  })
+})
+
 export default router
