@@ -4,6 +4,7 @@ import * as os from 'os'
 import * as fs from 'fs'
 import { AppProperties } from './core/AppProperties'
 import { TaskManager } from './core/TaskManager';
+import { PostgresDatabase } from './postgres/PostgresDatabase';
 
 /**
  * Entrypoint for bootstrapping and starting the application.
@@ -45,7 +46,11 @@ initialize().then(() => {
 async function initialize () {
   await Webade.initialize()
   await TaskManager.initialize()
-    // if you want to prevent the server from starting if the webade init fails
+  // Optionally, if you want to use and configure postgres DB, uncomment the
+  // following line
+  // await PostgresDatabase.initialize()
+  
+  // if you want to prevent the server from starting if the webade init fails
   // you can handle that scenario here. For now, just continue with launching
   // the server regardless
 

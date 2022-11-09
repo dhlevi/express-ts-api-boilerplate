@@ -101,6 +101,10 @@ It's simple for now, so expect these examples to expand to support a broader ran
 
 ## Default Endpoints
 
+### Top Level
+
+A Top level endpoint will be generated for you when the application starts up. This will dynamically build based off of your router configuration.
+
 ### Health Check
 
 Familiar to anyone who's used our standard Java Spring API templates, included in this example is a default endpoint called `/healthCheck`. Running the Health Check will return some status information about the current health of the application and subcomponents.
@@ -169,6 +173,11 @@ The `scheduled` option determines if the schedule will be started by default. If
 The `timezone` option identifies which timezone the cron schedule should use. By default, it will use your machines timezone settings, but if you want your job to run at an interval specified by a different timezone, set that option here.
 
 Next update to the task scheduler will likely be replacing some functionality with https://github.com/breejs/bree, which will allow for scheduled tasks on worker threads.
+
+## Database connections
+
+By Default, the `project.json` contains the install components and types for Oracle DB and Posrgres, with an example for Oracle connections in the webade components (which also uses the myBatis config). Unless you're connecting to both databases, you shouldn't use both. Remove the install and the code for the connection stuff you dont need. 
+
 
 ## More to come as I get the time to add things!
 
