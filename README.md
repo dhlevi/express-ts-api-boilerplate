@@ -178,6 +178,106 @@ Next update to the task scheduler will likely be replacing some functionality wi
 
 By Default, the `project.json` contains the install components and types for Oracle DB and Posrgres, with an example for Oracle connections in the webade components (which also uses the myBatis config). Unless you're connecting to both databases, you shouldn't use both. Remove the install and the code for the connection stuff you dont need. 
 
+## RSQL
+
+Included in the package is `mw-experts/rsql` which allows you to parse rsql query strings and convert them to Where clauses usable by oracle or postgres queries. You can do this by passing in your query as a param on your endpoint, then:
+
+```Typescript
+const where = RsqlToSqlConverter.getInstance().convert(query)
+```
+
+A more complete example:
+
+```Typescript
+import mybatisMapper = require('mybatis-mapper')
+import { PagedResult } from "../core/model/PagedResult"
+import { RsqlToSqlConverter } from '@mw-experts/rsql'
+
+export class myService {
+  public async getThings (page: number, rows: number, query: string): Promise<any | undefined> {
+    mybatisMapper.createMapper([path.resolve(__dirname, '../query-configs/smy-queries.xml')])
+    let where = null
+    if (query) {
+      where = RsqlToSqlConverter.getInstance().convert(query)
+    }
+
+    // create query and fetch result
+    const sql = mybatisMapper.getStatement('myQuery', 'myQuery_paged', { offset, rows, where }, {language: 'sql', indent: ' '})
+    const result = await Database.query(sql)
+    return new PagedResult(page, rows, Math.ceil(Number(countResult?.rows[0].count) / rows), result.rows)
+  }
+}
+```
+
+Note: PagedResult is a core model class included in the API as a helper for returning paged results
+
+RSQL is a query language for parametrized filtering of entries in RESTful APIs.
+
+It’s based on [FIQL](http://tools.ietf.org/html/draft-nottingham-atompub-fiql-00) (Feed Item Query Language)
+a URI-friendly syntax for expressing filters across the entries in an Atom Feed.
+
+The simplicity of RSQL and its capability to express complex queries in a compact and HTTP URI-friendly way
+makes it a good candidate for becoming a generic query language for searching REST endpoints.
+
+For example, you can query your resource like this:
+
+`/stations?query=elevation=gt=100,station_acronym==null`
+
+or
+`/readings?query=precipitation=ge=10;danger==5`
+
+or even
+
+`/readings?query=precipitation>=10 and danger==5`
+
+RSQL introduces simple and composite operators which can be used to build basic and complex queries.
+
+### Basic operators:
+
+| Basic Operator | Description         |
+|----------------|---------------------|
+| ==             | Equal To            |
+| !=             | Not Equal To        |
+| =gt=           | Greater Than        |
+| >              | Greater Than        |
+| =ge=           | Greater Or Equal To |
+| >=             | Greater Or Equal To |
+| =lt=           | Less Than           |
+| <              | Less Than           |
+| =le=           | Less Or Equal To    |
+| <=             | Less Or Equal To    |
+| =in=           | In                  |
+| =out=          | Not in              |
+| =includes-all= | Includes all        |
+| =includes-one= | Includes one        |
+
+These operators can be used to do all sort of simple queries.
+
+### Composite operators:
+
+| Composite Operator   | Description         |
+|----------------------|---------------------|
+| ;                    | Logical AND         |
+| and                  | Logical AND         |
+| ,                    | Logical OR          |
+| or                   | Logical OR          |
+
+These operators can be used to join the simple queries and build more involved queries which can be as complex as required.
+
+### Fields and Values
+#### Values can only consist of next regexp symbols:
+
+* in double quotes - space, any unicode letter, any unicode number, `_`, `-`, `.`, `'`, `(`, `)`
+* in single quotes - space, any unicode letter, any unicode number, `_`, `-`, `.`, `"`, `(`, `)`
+* without quotes - any unicode letter, any unicode number, `_`, `-`, `.`
+* with == or != operators you can also use asterisk `*` as a wildcard
+
+### Ordering
+
+By default, operators evaluated from left to right.
+However, a parenthesized expression can be used to change the precedence.
+
+* precipitation=lt=20;(station_name==TOBA CAMP,station_name==NICOLL)
 
 ## More to come as I get the time to add things!
 
