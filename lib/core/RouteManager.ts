@@ -145,8 +145,13 @@ export class RouteManager {
         for (const endpoint of controller.endpoints) {
           let route = controller.route + endpoint.route
           route = route.replace(/\/\//g, '/').trim()
-          console.log(`Creating ${endpoint.type.toUpperCase()} route for ${controller.name + '.' + endpoint.name} @ ${route}`)
-          if (endpoint.type === 'get') {
+          console.log(`Creating ${endpoint.type.toUpperCase()} route for ${controller.name + '.' + endpoint.name} @ ${route}`);
+          // Call the router endpoint function to create the route
+          const endpointFunc = ((router as any)[endpoint.type] as Function);
+          endpointFunc.apply(router, [route, ...endpoint.middleware, buildRouteHandler(endpoint.endpointFunc, endpoint.success, endpoint.parameters)]);
+          // Below is what you'd want to do, if you're intending on handling each call differently, or if the express functions change
+          // and we don't want to match
+          /* if (endpoint.type === 'get') {
             router.get(route, ...endpoint.middleware, buildRouteHandler(endpoint.endpointFunc, endpoint.success, endpoint.parameters))
           } else if (endpoint.type === 'post') {
             router.post(route, ...endpoint.middleware, buildRouteHandler(endpoint.endpointFunc, endpoint.success, endpoint.parameters))
@@ -158,7 +163,7 @@ export class RouteManager {
             router.delete(route, ...endpoint.middleware, buildRouteHandler(endpoint.endpointFunc, endpoint.success, endpoint.parameters))
           } else if (endpoint.type === 'options') {
             router.options(route, ...endpoint.middleware, buildRouteHandler(endpoint.endpointFunc, endpoint.success, endpoint.parameters))
-          }
+          } */
         }
       }
     } catch (err) {
